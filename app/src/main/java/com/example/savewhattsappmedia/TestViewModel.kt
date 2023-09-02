@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
@@ -11,16 +12,17 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
+import javax.inject.Inject
 import kotlin.Exception
 
-
-class TestViewModel : ViewModel() {
+@HiltViewModel
+class TestViewModel @Inject constructor() : ViewModel() {
     private val _photos = MutableLiveData<ImageResponse?>()
     val photos : LiveData<ImageResponse?> get() = _photos
+    private var currentImageRequestPage = 1
 
     fun getPhotos(
-        query: String?,
-        page: Int
+        query: String = "Sun"
     ){
         val photoService: PhotoApiService = Retrofit.Builder()
             .baseUrl("https://pixabay.com/")
@@ -33,18 +35,20 @@ class TestViewModel : ViewModel() {
                 val photos = photoService.getPhotos(
                     key = "36463103-c2d65a399fefc8955088325ab",
                     query = query,
-                    page = page
+                    page = currentImageRequestPage
                 )
                 photos?.let {
-
-
                     val images: List<Hits>? = it.hits?.let { newList ->
+                        newList.forEach {
+                            it.uuId = (Long.MIN_VALUE..Long.MAX_VALUE).random()
+                        }
                         (_photos.value?.hits ?: mutableListOf()).plus(newList)
                     }
 
                     _photos.value = it.copy(
                         hits = images
                     )
+                    currentImageRequestPage += 1
                 }
             }
         }catch (e : Exception){

@@ -30,5 +30,7 @@ data class Hits (
     val comments : String?,
     val user_id : String?,
     val user : String?,
-    val userImageURL : String?
-        )
+    val userImageURL : String?)
+{
+  var uuId : Long = 0L
+}
