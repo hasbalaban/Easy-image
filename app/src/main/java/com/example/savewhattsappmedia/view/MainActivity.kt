@@ -7,9 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -28,7 +26,6 @@ import com.example.savewhattsappmedia.ui.theme.SaveWhattsappMediaTheme
 
 
 class MainActivity : ComponentActivity() {
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -39,11 +36,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
 
-                    Scaffold() {it ->
-                        it.let {}
-
-                        MainNavHost()
-                    }
+                    MainNavHost()
                 }
             }
         }
@@ -52,21 +45,8 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainNavHost(){
-
     val context = LocalContext.current
-
     val navController = rememberNavController()
-    var backHandlingEnabled by remember { mutableStateOf(false) }
-
-    BackHandler(backHandlingEnabled) {
-        if (navController.currentDestination?.route == NavigationDirections.DetailScreen.route){
-            backHandlingEnabled = false
-            val activity = context as Activity
-            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-            navController.popBackStack()
-        }
-        else navController.popBackStack()
-    }
 
     NavHost(navController = navController, startDestination = NavigationDirections.HomeScreen.route ) {
 
