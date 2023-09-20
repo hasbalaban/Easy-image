@@ -23,6 +23,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.savewhattsappmedia.NavigationDirections
 import com.example.savewhattsappmedia.ui.theme.SaveWhattsappMediaTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 
 
 class MainActivity : ComponentActivity() {
@@ -53,24 +55,26 @@ fun MainNavHost(){
 
         composable(NavigationDirections.HomeScreen.route) {
             //val viewModel = hiltViewModel<TestViewModel>()
+            val coroutines : CoroutineScope = rememberCoroutineScope()
             val openImageDetail = { imageUrl : String ->
                 navController.navigate(NavigationDirections.DetailScreen.createRoute(imageUrl = imageUrl))
             }
 
-            HomeScreen(openImageDetail)
+            HomeScreen(openImageDetail, coroutines = coroutines)
+
+            DisposableEffect(LocalLifecycleOwner.current) {
+                onDispose { coroutines.cancel()}
+            }
         }
 
         composable(NavigationDirections.SearchScreen.route) {
 
         }
 
-        val detailScreenArguments = listOf(
-            navArgument("imageUrl") {
-                type = NavType.StringType; defaultValue = ""
-            }
-        )
 
-        composable(NavigationDirections.DetailScreen.route, arguments = detailScreenArguments) {
+        composable(NavigationDirections.DetailScreen.route, arguments = listOf(navArgument("imageUrl") {
+            type = NavType.StringType; defaultValue = ""
+        })) {
             val imageUrl = it.arguments?.getString("imageUrl") ?: ""
             val lifeCycleOwner = LocalLifecycleOwner.current
             val activity = context as Activity

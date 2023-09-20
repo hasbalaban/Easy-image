@@ -22,8 +22,20 @@ class TestViewModel @Inject constructor() : ViewModel() {
     private var currentImageRequestPage = 1
 
     fun getPhotos(
-        query: String = "Sun"
+        query: String = "Sun",
+        shouldClearPhotos : Boolean = false
     ){
+        var queryText = query
+        if (shouldClearPhotos) {
+            _photos.value = null
+            currentImageRequestPage = 1
+        }
+
+        if (queryText.isEmpty()){
+            queryText = "sun"
+            currentImageRequestPage = 1
+        }
+
         val photoService: PhotoApiService = Retrofit.Builder()
             .baseUrl("https://pixabay.com/")
             .addConverterFactory(GsonConverterFactory.create())
@@ -33,15 +45,17 @@ class TestViewModel @Inject constructor() : ViewModel() {
         try {
             viewModelScope.launch {
                 val photos = photoService.getPhotos(
-                    key = "36463103-c2d65a399fefc8955088325ab",
-                    query = query,
+                    key = "39342921-c040c554a9e966b3202b73519",
+                    query = queryText,
                     page = currentImageRequestPage
                 )
                 photos?.let {
                     val images: List<Hits>? = it.hits?.let { newList ->
+                        val range = (0L..Long.MAX_VALUE)
                         newList.forEach {
-                            it.uuId = (Long.MIN_VALUE..Long.MAX_VALUE).random()
+                            it.uuId = range.random()
                         }
+
                         (_photos.value?.hits ?: mutableListOf()).plus(newList)
                     }
 
