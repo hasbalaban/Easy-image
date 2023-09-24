@@ -75,7 +75,6 @@ fun DetailScreen(imageUrl: String, popBackStack: () -> Unit) {
             val result = (loader.execute(imageRequest) as SuccessResult).drawable
             bitmap = (result as BitmapDrawable).bitmap
         }
-
     }
     ConstraintLayout(modifier = Modifier
         .fillMaxSize()
@@ -133,7 +132,7 @@ fun DetailScreen(imageUrl: String, popBackStack: () -> Unit) {
                 }
                 .clickable {
                     bitmap?.asImageBitmap()?.let {
-                        SaveImageToCacheAndShare().saveImageToCache(it, context)
+                        SaveImageToCacheAndShare().saveImageToCache(it, context = context)
                     }
                 }.padding(12.dp).size(24.dp),
             painter = painterResource(id = R.drawable.share_icon),

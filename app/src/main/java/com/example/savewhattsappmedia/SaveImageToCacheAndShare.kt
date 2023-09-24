@@ -15,23 +15,30 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.OutputStream
+import java.util.ArrayList
 import java.util.Calendar
 
 
 class SaveImageToCacheAndShare {
-    fun saveImageToCache( image: ImageBitmap, context: Context) {
+    fun saveImageToCache( image1: ImageBitmap, image2: ImageBitmap? = null, context: Context) {
         try {
             val cacheDirectory: File = File(context.cacheDir, "images")
             if (!cacheDirectory.exists()) {
                 cacheDirectory.mkdirs()
             }
             val imageFile = File(cacheDirectory, "image.jpg")
+            val imageFile1 = File(cacheDirectory, "image1.jpg")
             val outputStream = FileOutputStream(imageFile)
-            val bitmap = image.asAndroidBitmap()
+            val outputStream1 = FileOutputStream(imageFile1)
+            val bitmap = image1.asAndroidBitmap()
+            val bitmap1 = image2?.asAndroidBitmap()
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+            bitmap1?.compress(Bitmap.CompressFormat.JPEG, 100, outputStream1)
 
             outputStream.flush()
+            outputStream1.flush()
             outputStream.close()
+            outputStream1.close()
 
             shareImage(context)
             saveToInternalStorage(context = context, bitmap = bitmap)
@@ -45,17 +52,29 @@ class SaveImageToCacheAndShare {
 
         val cacheDirectory: File = File(context.cacheDir, "images")
         val imageFile = File(cacheDirectory, "image.jpg")
+        val imageFile1 = File(cacheDirectory, "image1.jpg")
 
-        val shareIntent = Intent(Intent.ACTION_SEND)
+        val shareIntent = Intent(Intent.ACTION_SEND_MULTIPLE)
         shareIntent.type = "image/jpeg"
-        shareIntent.putExtra(
-            Intent.EXTRA_STREAM,
-            FileProvider.getUriForFile(
-                context,
-                context.packageName + ".provider",
-                imageFile
-            )
+        val uri1 =  FileProvider.getUriForFile(
+            context,
+            context.packageName + ".provider",
+            imageFile
         )
+        val uri2 =  FileProvider.getUriForFile(
+            context,
+            context.packageName + ".provider",
+            imageFile1
+        )
+        val a = ArrayList<Uri>()
+        a.add(uri1)
+        a.add(uri2)
+
+        shareIntent.putParcelableArrayListExtra(
+            Intent.EXTRA_STREAM,
+            a
+        )
+
         shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         context.startActivity(Intent.createChooser(shareIntent, "Share Image"));
     }
