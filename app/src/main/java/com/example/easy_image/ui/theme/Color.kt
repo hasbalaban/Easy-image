@@ -1,4 +1,4 @@
-package com.example.savewhattsappmedia.ui.theme
+package com.example.easy_image.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

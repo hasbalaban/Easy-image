@@ -1,4 +1,4 @@
-package com.example.savewhattsappmedia.ui.theme
+package com.example.easy_image.ui.theme
 
 import android.app.Activity
 import android.os.Build

@@ -1,4 +1,4 @@
-package com.example.savewhattsappmedia
+package com.example.easy_image
 
 import org.junit.Test
 

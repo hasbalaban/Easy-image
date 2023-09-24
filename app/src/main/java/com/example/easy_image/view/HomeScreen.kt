@@ -1,4 +1,4 @@
-package com.example.savewhattsappmedia.view
+package com.example.easy_image.view
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -71,12 +71,12 @@ import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.request.SuccessResult
-import com.example.savewhattsappmedia.Hits
-import com.example.savewhattsappmedia.ImageResponse
-import com.example.savewhattsappmedia.R
-import com.example.savewhattsappmedia.SaveImageToCacheAndShare
-import com.example.savewhattsappmedia.TestViewModel
-import com.example.savewhattsappmedia.ignoreNull
+import com.example.easy_image.Hits
+import com.example.easy_image.ImageResponse
+import com.example.easy_image.R
+import com.example.easy_image.SaveImageToCacheAndShare
+import com.example.easy_image.TestViewModel
+import com.example.easy_image.ignoreNull
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

@@ -1,4 +1,4 @@
-package com.example.savewhattsappmedia
+package com.example.easy_image
 
 object Constants {
     val firstNumber = 1

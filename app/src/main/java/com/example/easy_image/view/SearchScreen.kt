@@ -1,4 +1,4 @@
-package com.example.savewhattsappmedia.view
+package com.example.easy_image.view
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview

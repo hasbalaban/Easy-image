@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.savewhattsappmedia'
+    namespace 'com.example.easy_image'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.savewhattsappmedia"
+        applicationId "com.example.easy_image"
         minSdk 24
         targetSdk 33
         versionCode 1

@@ -1,10 +1,9 @@
-package com.example.savewhattsappmedia.view
+package com.example.easy_image.view
 
 import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -21,8 +20,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.savewhattsappmedia.NavigationDirections
-import com.example.savewhattsappmedia.ui.theme.SaveWhattsappMediaTheme
+import com.example.easy_image.NavigationDirections
+import com.example.easy_image.ui.theme.SaveWhattsappMediaTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 

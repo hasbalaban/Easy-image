@@ -1,6 +1,5 @@
-package com.example.savewhattsappmedia
+package com.example.easy_image
 
-import android.R.attr
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent

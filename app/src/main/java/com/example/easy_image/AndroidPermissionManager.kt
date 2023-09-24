@@ -1,8 +1,7 @@
-package com.example.savewhattsappmedia
+package com.example.easy_image
 
 import android.Manifest
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
