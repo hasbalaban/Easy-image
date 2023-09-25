@@ -94,6 +94,7 @@ fun HomeScreen(
     val state = rememberLazyGridState()
     val shouldGetNewPage by remember { derivedStateOf { (state.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0) >= ((photos.value?.hits?.size ?: 1) * 0.8) } }
     var searchedImageText by remember { mutableStateOf("sun") }
+    var gridCellCount by remember { mutableStateOf(1) }
 
 
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -108,6 +109,7 @@ fun HomeScreen(
     }
 
     ObserveCounter(
+        gridCellCount,
         shouldGetNewPage,
         state,
         photos.value,
@@ -120,7 +122,11 @@ fun HomeScreen(
                 viewModel.getPhotos(searchedImageText, shouldClearPhotos = true)
             }
         } ,
-        openImageDetail){
+        openImageDetail,
+        gridCellCountChanged = {
+            gridCellCount = it
+        }
+        ){
         viewModel.getPhotos(searchedImageText)
     }
 }
@@ -128,6 +134,7 @@ fun HomeScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ObserveCounter(
+    gridCellCount : Int,
     shouldGetNewPage : Boolean,
     state : LazyGridState,
     photos: ImageResponse?,
@@ -135,6 +142,7 @@ private fun ObserveCounter(
     coroutines: CoroutineScope,
     onSearchedTextChanged: (String) -> Unit,
     openImageDetail : (String) -> Unit,
+    gridCellCountChanged: (Int) -> Unit,
     scrollToBottomOfPhotos : () -> Unit,
 ) {
 
@@ -152,7 +160,13 @@ private fun ObserveCounter(
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = { MainTopAppBar(scrollBehavior, searchedImageText, selectedImages, dropDownMenuExpanded){
+        topBar = { MainTopAppBar(
+            scrollBehavior, searchedImageText, selectedImages,
+            dropDownMenuExpanded,
+            gridCellCountChanged = {
+                gridCellCountChanged.invoke(it)
+            },
+        ) {
             dropDownMenuExpanded = it
         } },
         bottomBar = {
@@ -167,7 +181,7 @@ private fun ObserveCounter(
         }
     ) {
         Column(modifier = Modifier.padding(it)) {
-            MainContent(photos, state, openImageDetail, coroutines, selectedImages,
+            MainContent(gridCellCount, photos, state, openImageDetail, coroutines, selectedImages,
                 {uuId, bitmap, isChecked ->
 
                     if (isChecked){
@@ -204,7 +218,7 @@ private fun FloatActionContent(coroutines: CoroutineScope, state: LazyGridState,
                 .clickable {
                     coroutines.launch {
                         var targetPosition =
-                            (state.layoutInfo.visibleItemsInfo.firstOrNull()?.index.ignoreNull()) - (state.layoutInfo.visibleItemsInfo.lastOrNull()?.index.ignoreNull() - state.layoutInfo.visibleItemsInfo.firstOrNull()?.index.ignoreNull() - 8 )
+                            (state.layoutInfo.visibleItemsInfo.firstOrNull()?.index.ignoreNull()) - (state.layoutInfo.visibleItemsInfo.lastOrNull()?.index.ignoreNull() - state.layoutInfo.visibleItemsInfo.firstOrNull()?.index.ignoreNull() - 8)
                         targetPosition = if (targetPosition <= 0) 0 else targetPosition
                         state.animateScrollToItem(targetPosition)
                     }
@@ -236,6 +250,7 @@ private fun FloatActionContent(coroutines: CoroutineScope, state: LazyGridState,
 
 @Composable
 private fun MainContent(
+    gridCellCount : Int,
     photos: ImageResponse?,
     state: LazyGridState,
     openImageDetail: (String) -> Unit,
@@ -250,7 +265,7 @@ private fun MainContent(
         val context = LocalContext.current
 
         LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
+            columns = GridCells.Fixed(gridCellCount),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(horizontal = 4.dp, vertical = 12.dp),
@@ -266,7 +281,7 @@ private fun MainContent(
                 val isChecked = selectedImagesList.any {
                     it.first == item.uuId
                 }
-                ImageItem(item, openImageDetail, onSelectedImage, isChecked = isChecked, context, coroutines,
+                ImageItem(gridCellCount, item, openImageDetail, onSelectedImage, isChecked = isChecked, context, coroutines,
                 shouldCheckBoxVisible = shouldCheckBoxVisible){
                     onImageLongClicked.invoke()
                 }
@@ -278,6 +293,7 @@ private fun MainContent(
 
 @Composable
 private fun ImageItem(
+    gridCellCount : Int,
     item: Hits,
     openImageDetail: (String) -> Unit,
     onSelectedImage: (Long, Bitmap, Boolean) -> Unit,
@@ -324,7 +340,8 @@ private fun ImageItem(
                             }
                         },
                         onTap = {
-                            val url = item.fullHDURL ?: item.largeImageURL ?: item.imageURL ?: item.previewURL
+                            val url = item.fullHDURL ?: item.largeImageURL ?: item.imageURL
+                            ?: item.previewURL
 
                             url?.let {
                                 openImageDetail.invoke(it)
@@ -337,7 +354,7 @@ private fun ImageItem(
                                 isZoomed = false
                                 return@detectTapGestures
                             }
-                            scale = 1.1f
+                            scale = ((1f * (1.0 + (gridCellCount * 0.1))).toFloat())
                             isZoomed = true
                         }
                     )
@@ -387,6 +404,7 @@ private fun MainTopAppBar(
     searchedImageText: String,
     selectedImages: SnapshotStateList<Pair<Long, Bitmap>>,
     dropDownMenuExpanded : Boolean,
+    gridCellCountChanged : (Int) -> Unit,
     onStateChanged : (Boolean) -> Unit
 ) {
 
@@ -443,26 +461,37 @@ private fun MainTopAppBar(
             ) {
                 DropdownMenuItem(
                     onClick = {
-                        Toast.makeText(context, "Refresh Click", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "gridCellCount set 1", Toast.LENGTH_SHORT).show()
+                        gridCellCountChanged.invoke(1)
                         onStateChanged.invoke(false)
                     },
-                    text = {Text("Refresh")}
+                    text = {Text("gridCellCount set 1")}
 
                 )
                 DropdownMenuItem(
                     onClick = {
-                        Toast.makeText(context, "Settings Click", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "gridCellCount set 2", Toast.LENGTH_SHORT).show()
+                        gridCellCountChanged.invoke(2)
                         onStateChanged.invoke(false)
                     },
-                    text = {Text("Settings")}
+                    text = {Text("gridCellCount set 2")}
 
                 )
                 DropdownMenuItem(
                     onClick = {
-                        Toast.makeText(context, "Send Feedback Click", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "gridCellCount set 3", Toast.LENGTH_SHORT).show()
+                        gridCellCountChanged.invoke(3)
                         onStateChanged.invoke(false)
                     },
-                    text = {Text("Send Feedback")}
+                    text = {Text("gridCellCount set 3")}
+                )
+                DropdownMenuItem(
+                    onClick = {
+                        Toast.makeText(context, "gridCellCount set 5", Toast.LENGTH_SHORT).show()
+                        gridCellCountChanged.invoke(5)
+                        onStateChanged.invoke(false)
+                    },
+                    text = {Text("gridCellCount set 5")}
                 )
             }
         }
