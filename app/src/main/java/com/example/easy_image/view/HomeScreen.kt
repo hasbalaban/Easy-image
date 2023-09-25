@@ -293,8 +293,8 @@ private fun ImageItem(
 
     val createBitmap : (Long, Boolean, ImageLoader, ImageRequest)->  Unit = {id, status, imageLoader, imageReguest ->
             coroutines.launch {
-                val result = (imageLoader.execute(imageReguest) as SuccessResult).drawable
-                 (result as BitmapDrawable).bitmap?.let { it1 ->
+                val result = (imageLoader.execute(imageReguest) as? SuccessResult)?.drawable
+                 (result as? BitmapDrawable)?.bitmap?.let { it1 ->
                      onSelectedImage.invoke(item.uuId, it1, status)
                  }
             }
