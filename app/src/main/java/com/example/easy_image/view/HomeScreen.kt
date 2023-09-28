@@ -122,98 +122,89 @@ fun HomeScreen(
         }
     }
 
-    Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = "$searchedImageText images",
-                        textAlign = TextAlign.Start,
-                        color = Color.Red,
-                        fontSize = 26.sp,
-                        fontFamily = FontFamily.SansSerif
-                    )
-                },
-                colors = TopAppBarDefaults.smallTopAppBarColors(Color.LightGray),
-                scrollBehavior = scrollBehavior,
-                actions = {
+    Scaffold(modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection), topBar = {
+        TopAppBar(title = {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = "$searchedImageText images",
+                textAlign = TextAlign.Start,
+                color = Color.Red,
+                fontSize = 26.sp,
+                fontFamily = FontFamily.SansSerif
+            )
+        },
+            colors = TopAppBarDefaults.smallTopAppBarColors(Color.LightGray),
+            scrollBehavior = scrollBehavior,
+            actions = {
 
-                    DropDownMenu(
-                        dropDownMenuExpanded = dropDownMenuExpanded,
-                        gridCellCountChanged = {
-                            gridCellCount = it
-                        },
-                        onStateChanged = {
-                            dropDownMenuExpanded = false
-                        },
-                    )
+                DropDownMenu(
+                    dropDownMenuExpanded = dropDownMenuExpanded,
+                    gridCellCountChanged = {
+                        gridCellCount = it
+                    },
+                    onStateChanged = {
+                        dropDownMenuExpanded = false
+                    },
+                )
 
-                    if (selectedImages.isEmpty().not()) {
-                        Button(onClick = {
-                            selectedImages.map {
-                                it.second
-                            }.let {
-                                val first = it.first().asImageBitmap()
-                                val second = it.getOrNull(1)?.asImageBitmap()
-                                second?.let {
-                                    SaveImageToCacheAndShare().saveImageToCache(
-                                        first,
-                                        it,
-                                        context = context
-                                    )
-                                }
+                if (selectedImages.isEmpty().not()) {
+                    Button(onClick = {
+                        selectedImages.map {
+                            it.second
+                        }.let {
+                            val first = it.first().asImageBitmap()
+                            val second = it.getOrNull(1)?.asImageBitmap()
+                            second?.let {
+                                SaveImageToCacheAndShare().saveImageToCache(
+                                    first, it, context = context
+                                )
                             }
-
-                        }) {
-                            Image(
-                                painter = painterResource(id = R.drawable.share_icon),
-                                contentDescription = "save All images"
-                            )
                         }
-                    }
 
-                    IconButton(onClick = {
-                        dropDownMenuExpanded = true
                     }) {
-                        Icon(imageVector = Icons.Outlined.MoreVert, contentDescription = "Options")
+                        Image(
+                            painter = painterResource(id = R.drawable.share_icon),
+                            contentDescription = "save All images"
+                        )
                     }
                 }
-            )
-        },
-        bottomBar = {
 
-            val interactionSource = remember { MutableInteractionSource() }
-            TopAppBar(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 6.dp, top = 6.dp, end = 6.dp),
-                title = {
-                    OutlinedTextField(
-                        value = searchedImageText,
-                        onValueChange = { newText: String ->
-                            coroutines.launch {
-                                delay(300L)
-                                viewModel.getPhotos(searchedImageText, shouldClearPhotos = true)
-                            }
-                            searchedImageText = newText
-                        },
-                        interactionSource = interactionSource,
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20f),
-                        placeholder = ({ Text(text = "search image") })
-                    )
-                },
-                scrollBehavior = scrollBehavior
-            )
-        },
-        floatingActionButton = {
-            photos.value?.hits?.size?.let {
-                FloatActionContent(coroutines, state, it)
-            }
+                IconButton(onClick = {
+                    dropDownMenuExpanded = true
+                }) {
+                    Icon(imageVector = Icons.Outlined.MoreVert, contentDescription = "Options")
+                }
+            })
+    }, bottomBar = {
+
+        val interactionSource = remember { MutableInteractionSource() }
+        TopAppBar(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 6.dp, top = 6.dp, end = 6.dp),
+            title = {
+                OutlinedTextField(
+                    value = searchedImageText,
+                    onValueChange = { newText: String ->
+                        coroutines.launch {
+                            delay(300L)
+                            viewModel.getPhotos(searchedImageText, shouldClearPhotos = true)
+                        }
+                        searchedImageText = newText
+                    },
+                    interactionSource = interactionSource,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20f),
+                    placeholder = ({ Text(text = "search image") })
+                )
+            },
+            scrollBehavior = scrollBehavior
+        )
+    }, floatingActionButton = {
+        photos.value?.hits?.size?.let {
+            FloatActionContent(coroutines, state, it)
         }
-    ) {
+    }) {
         Column(modifier = Modifier.padding(it)) {
 
             photos.value?.hits?.let {
@@ -226,21 +217,22 @@ fun HomeScreen(
                     state = state
                 ) {
 
-                    items(
-                        it,
-                        key = { it.uuId }
-                    ) { item ->
+                    items(it, key = { it.uuId }) { item ->
 
                         val isChecked = selectedImages.any { it.first == item.uuId }
                         ImageItem(
-                            gridCellCount, item, openImageDetail,
+                            gridCellCount,
+                            item,
+                            openImageDetail,
                             {
                                 shouldCheckBoxVisible = shouldCheckBoxVisible.not()
                                 if (shouldCheckBoxVisible) {
                                     selectedImages.clear()
                                 }
 
-                            }, isChecked = isChecked, coroutines,
+                            },
+                            isChecked = isChecked,
+                            coroutines,
                             shouldCheckBoxVisible = shouldCheckBoxVisible
                         ) { uuId, bitmap, checked ->
 
@@ -271,47 +263,35 @@ private fun DropDownMenu(
     onStateChanged: (Boolean) -> Unit
 ) {
     DropdownMenu(
-        expanded = dropDownMenuExpanded,
-        onDismissRequest = {
+        expanded = dropDownMenuExpanded, onDismissRequest = {
             onStateChanged.invoke(false)
-        },
-        offset = DpOffset(x = 10.dp, y = (-60).dp)
+        }, offset = DpOffset(x = 10.dp, y = (-60).dp)
     ) {
         val context = LocalContext.current
-        DropdownMenuItem(
-            onClick = {
-                Toast.makeText(context, "gridCellCount set 1", Toast.LENGTH_SHORT).show()
-                gridCellCountChanged.invoke(1)
-                onStateChanged.invoke(false)
-            },
-            text = { Text("gridCellCount set 1") }
+        DropdownMenuItem(onClick = {
+            Toast.makeText(context, "gridCellCount set 1", Toast.LENGTH_SHORT).show()
+            gridCellCountChanged.invoke(1)
+            onStateChanged.invoke(false)
+        }, text = { Text("gridCellCount set 1") }
 
         )
-        DropdownMenuItem(
-            onClick = {
-                Toast.makeText(context, "gridCellCount set 2", Toast.LENGTH_SHORT).show()
-                gridCellCountChanged.invoke(2)
-                onStateChanged.invoke(false)
-            },
-            text = { Text("gridCellCount set 2") }
+        DropdownMenuItem(onClick = {
+            Toast.makeText(context, "gridCellCount set 2", Toast.LENGTH_SHORT).show()
+            gridCellCountChanged.invoke(2)
+            onStateChanged.invoke(false)
+        }, text = { Text("gridCellCount set 2") }
 
         )
-        DropdownMenuItem(
-            onClick = {
-                Toast.makeText(context, "gridCellCount set 3", Toast.LENGTH_SHORT).show()
-                gridCellCountChanged.invoke(3)
-                onStateChanged.invoke(false)
-            },
-            text = { Text("gridCellCount set 3") }
-        )
-        DropdownMenuItem(
-            onClick = {
-                Toast.makeText(context, "gridCellCount set 5", Toast.LENGTH_SHORT).show()
-                gridCellCountChanged.invoke(5)
-                onStateChanged.invoke(false)
-            },
-            text = { Text("gridCellCount set 5") }
-        )
+        DropdownMenuItem(onClick = {
+            Toast.makeText(context, "gridCellCount set 3", Toast.LENGTH_SHORT).show()
+            gridCellCountChanged.invoke(3)
+            onStateChanged.invoke(false)
+        }, text = { Text("gridCellCount set 3") })
+        DropdownMenuItem(onClick = {
+            Toast.makeText(context, "gridCellCount set 5", Toast.LENGTH_SHORT).show()
+            gridCellCountChanged.invoke(5)
+            onStateChanged.invoke(false)
+        }, text = { Text("gridCellCount set 5") })
     }
 
 }
@@ -333,26 +313,24 @@ private fun FloatActionContent(coroutines: CoroutineScope, state: LazyGridState,
                     }
                 },
             colorFilter = ColorFilter.tint(Color.Black),
-            painter = painterResource(id = R.drawable.arrow_upward), contentDescription = "go to up"
+            painter = painterResource(id = R.drawable.arrow_upward),
+            contentDescription = "go to up"
         )
-        Image(
-            modifier = Modifier
-                .padding(top = 6.dp)
-                .clickable {
-                    coroutines.launch {
-                        var targetPosition =
-                            state.layoutInfo.visibleItemsInfo.firstOrNull()?.index.ignoreNull() + (state.layoutInfo.visibleItemsInfo.lastOrNull()?.index.ignoreNull() - state.layoutInfo.visibleItemsInfo.firstOrNull()?.index.ignoreNull()) - 2
-                        targetPosition =
-                            if (targetPosition > lastIndex) lastIndex else targetPosition
-                        state.animateScrollToItem(targetPosition)
-                    }
+        Image(modifier = Modifier
+            .padding(top = 6.dp)
+            .clickable {
+                coroutines.launch {
+                    var targetPosition =
+                        state.layoutInfo.visibleItemsInfo.firstOrNull()?.index.ignoreNull() + (state.layoutInfo.visibleItemsInfo.lastOrNull()?.index.ignoreNull() - state.layoutInfo.visibleItemsInfo.firstOrNull()?.index.ignoreNull()) - 2
+                    targetPosition = if (targetPosition > lastIndex) lastIndex else targetPosition
+                    state.animateScrollToItem(targetPosition)
                 }
-                .background(Color.White)
-                .padding(4.dp),
+            }
+            .background(Color.White)
+            .padding(4.dp),
             colorFilter = ColorFilter.tint(Color.Black),
             painter = painterResource(id = R.drawable.arrow_downward),
-            contentDescription = "go to bottom"
-        )
+            contentDescription = "go to bottom")
     }
 }
 
@@ -379,53 +357,45 @@ private fun ImageItem(
 
     ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
         val loader = ImageLoader(context)
-        val imageRequest = ImageRequest.Builder(context)
-            .data(imageUrl)
-            .allowHardware(false)
-            .crossfade(true)
-            .build()
+        val imageRequest =
+            ImageRequest.Builder(context).data(imageUrl).allowHardware(false).crossfade(true)
+                .build()
 
         val (checkBox) = createRefs()
-        AsyncImage(
-            modifier = Modifier
-                .graphicsLayer(
-                    scaleX = scale,
-                    scaleY = scale
-                )
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onLongPress = {
-                            coroutines.launch {
-                                delay(100)
-                                onImageLongClicked.invoke()
-                            }
-                        },
-                        onTap = {
-                            val url = item.fullHDURL ?: item.largeImageURL ?: item.imageURL
-                            ?: item.previewURL
+        AsyncImage(modifier = Modifier
+            .graphicsLayer(
+                scaleX = scale, scaleY = scale
+            )
+            .pointerInput(Unit) {
+                detectTapGestures(onLongPress = {
+                    coroutines.launch {
+                        delay(100)
+                        onImageLongClicked.invoke()
+                    }
+                }, onTap = {
+                    val url =
+                        item.fullHDURL ?: item.largeImageURL ?: item.imageURL ?: item.previewURL
 
-                            url?.let {
-                                openImageDetail.invoke(it)
-                            }
-                        },
+                    url?.let {
+                        openImageDetail.invoke(it)
+                    }
+                },
 
-                        onDoubleTap = {
-                            if (isZoomed) {
-                                scale = 1f
-                                isZoomed = false
-                                return@detectTapGestures
-                            }
-                            scale = ((1f * (1.0 + (gridCellCount * 0.1))).toFloat())
-                            isZoomed = true
+                    onDoubleTap = {
+                        if (isZoomed) {
+                            scale = 1f
+                            isZoomed = false
+                            return@detectTapGestures
                         }
-                    )
-                }
-                .fillMaxWidth()
-                .size(120.dp),
+                        scale = ((1f * (1.0 + (gridCellCount * 0.1))).toFloat())
+                        isZoomed = true
+                    })
+            }
+            .fillMaxWidth()
+            .size(120.dp),
             model = imageRequest,
             contentDescription = null,
-            contentScale = ContentScale.FillWidth
-        )
+            contentScale = ContentScale.FillWidth)
 
         if (shouldCheckBoxVisible) {
             Checkbox(
@@ -446,8 +416,7 @@ private fun ImageItem(
                     }
                 },
                 colors = CheckboxDefaults.colors(
-                    checkedColor = Color.Blue,
-                    uncheckedColor = Color.White
+                    checkedColor = Color.Blue, uncheckedColor = Color.White
                 )
             )
         }
