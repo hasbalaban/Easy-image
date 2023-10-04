@@ -12,7 +12,9 @@ import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -65,10 +67,9 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import coil.ImageLoader
-import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-import coil.request.SuccessResult
+import coil.size.Size
 import com.example.easy_image.Hits
 import com.example.easy_image.R
 import com.example.easy_image.SaveImageToCacheAndShare
@@ -149,6 +150,8 @@ fun HomeScreen(
 
                 if (selectedImages.isEmpty().not()) {
                     Button(onClick = {
+
+
                         selectedImages.map {
                             it.second
                         }.let {
@@ -177,6 +180,8 @@ fun HomeScreen(
             })
     }, bottomBar = {
 
+
+
         val interactionSource = remember { MutableInteractionSource() }
         TopAppBar(
             modifier = Modifier
@@ -202,7 +207,7 @@ fun HomeScreen(
         )
     }, floatingActionButton = {
         photos.value?.hits?.size?.let {
-            FloatActionContent(coroutines, state, it)
+            FloatActionContent(coroutines, state, it, gridCellCount)
         }
     }) {
         Column(modifier = Modifier.padding(it)) {
@@ -297,7 +302,12 @@ private fun DropDownMenu(
 }
 
 @Composable
-private fun FloatActionContent(coroutines: CoroutineScope, state: LazyGridState, lastIndex: Int) {
+private fun FloatActionContent(
+    coroutines: CoroutineScope,
+    state: LazyGridState,
+    lastIndex: Int,
+    gridCellCount: Int
+) {
     Column() {
         Image(
             modifier = Modifier
@@ -306,7 +316,7 @@ private fun FloatActionContent(coroutines: CoroutineScope, state: LazyGridState,
                 .clickable {
                     coroutines.launch {
                         var targetPosition =
-                            (state.layoutInfo.visibleItemsInfo.firstOrNull()?.index.ignoreNull()) - (state.layoutInfo.visibleItemsInfo.lastOrNull()?.index.ignoreNull() - state.layoutInfo.visibleItemsInfo.firstOrNull()?.index.ignoreNull() - 8)
+                            (state.layoutInfo.visibleItemsInfo.firstOrNull()?.index.ignoreNull()) - (gridCellCount * 2)
 
                         targetPosition = if (targetPosition <= 0) 0 else targetPosition
                         state.animateScrollToItem(targetPosition)
@@ -316,16 +326,17 @@ private fun FloatActionContent(coroutines: CoroutineScope, state: LazyGridState,
             painter = painterResource(id = R.drawable.arrow_upward),
             contentDescription = "go to up"
         )
+        Spacer(modifier = Modifier.height(6.dp))
         Image(modifier = Modifier
-            .padding(top = 6.dp)
             .clickable {
                 coroutines.launch {
-                    var targetPosition =
-                        state.layoutInfo.visibleItemsInfo.firstOrNull()?.index.ignoreNull() + (state.layoutInfo.visibleItemsInfo.lastOrNull()?.index.ignoreNull() - state.layoutInfo.visibleItemsInfo.firstOrNull()?.index.ignoreNull()) - 2
+                    var targetPosition =(state.layoutInfo.visibleItemsInfo.firstOrNull()?.index.ignoreNull()) + (gridCellCount * 4)
+
                     targetPosition = if (targetPosition > lastIndex) lastIndex else targetPosition
                     state.animateScrollToItem(targetPosition)
                 }
             }
+            .padding(top = 6.dp)
             .background(Color.White)
             .padding(4.dp),
             colorFilter = ColorFilter.tint(Color.Black),
@@ -345,57 +356,69 @@ private fun ImageItem(
     shouldCheckBoxVisible: Boolean,
     onSelectedImage: (Long, Bitmap, Boolean) -> Unit,
 ) {
-    val context = LocalContext.current
     var isZoomed by remember { mutableStateOf(false) }
-    val imageUrl by remember {
-        mutableStateOf(
-            item.imageURL ?: item.largeImageURL ?: item.fullHDURL ?: item.previewURL
-        )
-    }
+    val imageUrl by remember { mutableStateOf(item.imageURL ?: item.largeImageURL ?: item.fullHDURL ?: item.previewURL) }
     var scale by remember { mutableStateOf(1f) }
+    
+    var bitmap: Bitmap? by remember { mutableStateOf(null) }
+    
 
-
-    ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
-        val loader = ImageLoader(context)
-        val imageRequest =
-            ImageRequest.Builder(context).data(imageUrl).allowHardware(false).crossfade(true)
-                .build()
-
+    ConstraintLayout(modifier = Modifier
+        .fillMaxWidth()
+        .height(120.dp)) {
         val (checkBox) = createRefs()
-        AsyncImage(modifier = Modifier
-            .graphicsLayer(
-                scaleX = scale, scaleY = scale
+        val painter1 = rememberAsyncImagePainter(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(imageUrl)
+                .listener { request, result ->
+                    bitmap = (result.drawable  as BitmapDrawable).bitmap
+                }
+                .size(Size.ORIGINAL)
+                .build()
+        )
+
+        painter1.state.painter?.let {
+
+            Image(
+                painter = it,
+                contentDescription = null,
+                modifier = Modifier
+                    .graphicsLayer(
+                        scaleX = scale, scaleY = scale
+                    )
+                    .pointerInput(Unit) {
+                        detectTapGestures(onLongPress = {
+                            coroutines.launch {
+                                delay(100)
+                                onImageLongClicked.invoke()
+                            }
+                        }, onTap = {
+                            val url =
+                                item.fullHDURL ?: item.largeImageURL ?: item.imageURL
+                                ?: item.previewURL
+
+                            url?.let {
+                                openImageDetail.invoke(it)
+                            }
+                        },
+
+                            onDoubleTap = {
+                                if (isZoomed) {
+                                    scale = 1f
+                                    isZoomed = false
+                                    return@detectTapGestures
+                                }
+                                scale = ((1f * (1.0 + (gridCellCount * 0.1))).toFloat())
+                                isZoomed = true
+                            })
+                    }
+                    .fillMaxWidth()
+                    .size(120.dp),
+                contentScale = ContentScale.FillBounds
             )
-            .pointerInput(Unit) {
-                detectTapGestures(onLongPress = {
-                    coroutines.launch {
-                        delay(100)
-                        onImageLongClicked.invoke()
-                    }
-                }, onTap = {
-                    val url =
-                        item.fullHDURL ?: item.largeImageURL ?: item.imageURL ?: item.previewURL
+        }
 
-                    url?.let {
-                        openImageDetail.invoke(it)
-                    }
-                },
 
-                    onDoubleTap = {
-                        if (isZoomed) {
-                            scale = 1f
-                            isZoomed = false
-                            return@detectTapGestures
-                        }
-                        scale = ((1f * (1.0 + (gridCellCount * 0.1))).toFloat())
-                        isZoomed = true
-                    })
-            }
-            .fillMaxWidth()
-            .size(120.dp),
-            model = imageRequest,
-            contentDescription = null,
-            contentScale = ContentScale.FillWidth)
 
         if (shouldCheckBoxVisible) {
             Checkbox(
@@ -409,8 +432,7 @@ private fun ImageItem(
                     },
                 onCheckedChange = {
                     coroutines.launch {
-                        val result = (loader.execute(imageRequest) as? SuccessResult)?.drawable
-                        (result as? BitmapDrawable)?.bitmap?.let { it1 ->
+                        bitmap?.let { it1 ->
                             onSelectedImage.invoke(item.uuId, it1, it)
                         }
                     }
