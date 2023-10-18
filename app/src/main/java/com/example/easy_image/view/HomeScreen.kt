@@ -91,12 +91,7 @@ fun HomeScreen(
 
     val photos = viewModel.photos.observeAsState()
     val state = rememberLazyGridState()
-    val shouldGetNewPage by remember {
-        derivedStateOf {
-            (state.layoutInfo.visibleItemsInfo.lastOrNull()?.index
-                ?: 0) >= ((photos.value?.hits?.size ?: 1) * 0.8)
-        }
-    }
+    val shouldGetNewPage by remember { derivedStateOf { (state.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0) >= ((photos.value?.hits?.size ?: 1) * 0.8) } }
     var searchedImageText by remember { mutableStateOf("sun") }
     var gridCellCount by remember { mutableStateOf(1) }
 
@@ -105,8 +100,10 @@ fun HomeScreen(
     var dropDownMenuExpanded by remember { mutableStateOf(false) }
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
-
     val keyboardController = LocalSoftwareKeyboardController.current
+
+    val interactionSource = remember { MutableInteractionSource() }
+
     if (state.interactionSource.collectIsDraggedAsState().value) {
         LaunchedEffect(Unit) {
             keyboardController?.hide()
@@ -125,19 +122,25 @@ fun HomeScreen(
 
     Scaffold(modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection), topBar = {
         TopAppBar(title = {
-            Text(
+
+            OutlinedTextField(
+                value = searchedImageText,
+                onValueChange = { newText: String ->
+                    coroutines.launch {
+                        delay(300L)
+                        viewModel.getPhotos(searchedImageText, shouldClearPhotos = true)
+                    }
+                    searchedImageText = newText
+                },
+                interactionSource = interactionSource,
                 modifier = Modifier.fillMaxWidth(),
-                text = "$searchedImageText images",
-                textAlign = TextAlign.Start,
-                color = Color.Red,
-                fontSize = 26.sp,
-                fontFamily = FontFamily.SansSerif
+                shape = RoundedCornerShape(20f),
+                placeholder = ({ Text(text = "search image") })
             )
         },
             colors = TopAppBarDefaults.smallTopAppBarColors(Color.LightGray),
             scrollBehavior = scrollBehavior,
             actions = {
-
                 DropDownMenu(
                     dropDownMenuExpanded = dropDownMenuExpanded,
                     gridCellCountChanged = {
@@ -151,16 +154,11 @@ fun HomeScreen(
                 if (selectedImages.isEmpty().not()) {
                     Button(onClick = {
 
-
-                        selectedImages.map {
-                            it.second
-                        }.let {
+                        selectedImages.map { it.second }.let {
                             val first = it.first().asImageBitmap()
                             val second = it.getOrNull(1)?.asImageBitmap()
                             second?.let {
-                                SaveImageToCacheAndShare().saveImageToCache(
-                                    first, it, context = context
-                                )
+                                SaveImageToCacheAndShare().saveImageToCache(first, it, context = context)
                             }
                         }
 
@@ -172,43 +170,23 @@ fun HomeScreen(
                     }
                 }
 
-                IconButton(onClick = {
-                    dropDownMenuExpanded = true
-                }) {
+                IconButton(onClick = { dropDownMenuExpanded = true }) {
                     Icon(imageVector = Icons.Outlined.MoreVert, contentDescription = "Options")
                 }
             })
     }, bottomBar = {
 
-
-
-        val interactionSource = remember { MutableInteractionSource() }
         TopAppBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 6.dp, top = 6.dp, end = 6.dp),
             title = {
-                OutlinedTextField(
-                    value = searchedImageText,
-                    onValueChange = { newText: String ->
-                        coroutines.launch {
-                            delay(300L)
-                            viewModel.getPhotos(searchedImageText, shouldClearPhotos = true)
-                        }
-                        searchedImageText = newText
-                    },
-                    interactionSource = interactionSource,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20f),
-                    placeholder = ({ Text(text = "search image") })
-                )
+
             },
             scrollBehavior = scrollBehavior
         )
     }, floatingActionButton = {
-        photos.value?.hits?.size?.let {
-            FloatActionContent(coroutines, state, it, gridCellCount)
-        }
+        photos.value?.hits?.size?.let { FloatActionContent(coroutines, state, it, gridCellCount) }
     }) {
         Column(modifier = Modifier.padding(it)) {
 
@@ -218,41 +196,29 @@ fun HomeScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(horizontal = 4.dp, vertical = 12.dp),
-                    userScrollEnabled = true,
-                    state = state
+                    userScrollEnabled = true, state = state
                 ) {
 
-                    items(it, key = { it.uuId }) { item ->
+                    items(
+                        items = it,
+                        key = {
+                            it.uuId
+                        }
+                    ) { item ->
 
                         val isChecked = selectedImages.any { it.first == item.uuId }
                         ImageItem(
-                            gridCellCount,
-                            item,
-                            openImageDetail,
+                            gridCellCount, item, openImageDetail,
                             {
                                 shouldCheckBoxVisible = shouldCheckBoxVisible.not()
-                                if (shouldCheckBoxVisible) {
-                                    selectedImages.clear()
-                                }
-
+                                if (shouldCheckBoxVisible) selectedImages.clear()
                             },
-                            isChecked = isChecked,
-                            coroutines,
+                            isChecked = isChecked, coroutines = coroutines,
                             shouldCheckBoxVisible = shouldCheckBoxVisible
                         ) { uuId, bitmap, checked ->
 
-                            if (checked) {
-                                selectedImages.add(Pair(first = uuId, second = bitmap))
-                                return@ImageItem
-                            }
-
-                            selectedImages.firstOrNull {
-                                it.first == uuId
-                            }?.let {
-                                selectedImages.remove(it)
-                            }
-
-                            return@ImageItem
+                            if (checked) selectedImages.add(Pair(first = uuId, second = bitmap))
+                            else selectedImages.firstOrNull { it.first == uuId }?.let { selectedImages.remove(it) }
                         }
                     }
                 }
@@ -273,31 +239,33 @@ private fun DropDownMenu(
         }, offset = DpOffset(x = 10.dp, y = (-60).dp)
     ) {
         val context = LocalContext.current
-        DropdownMenuItem(onClick = {
-            Toast.makeText(context, "gridCellCount set 1", Toast.LENGTH_SHORT).show()
+        ClickDropDownMenuItem(1){
             gridCellCountChanged.invoke(1)
             onStateChanged.invoke(false)
-        }, text = { Text("gridCellCount set 1") }
-
-        )
-        DropdownMenuItem(onClick = {
-            Toast.makeText(context, "gridCellCount set 2", Toast.LENGTH_SHORT).show()
+        }
+        ClickDropDownMenuItem(2){
             gridCellCountChanged.invoke(2)
             onStateChanged.invoke(false)
-        }, text = { Text("gridCellCount set 2") }
-
-        )
-        DropdownMenuItem(onClick = {
-            Toast.makeText(context, "gridCellCount set 3", Toast.LENGTH_SHORT).show()
+        }
+        ClickDropDownMenuItem(3){
             gridCellCountChanged.invoke(3)
             onStateChanged.invoke(false)
-        }, text = { Text("gridCellCount set 3") })
-        DropdownMenuItem(onClick = {
-            Toast.makeText(context, "gridCellCount set 5", Toast.LENGTH_SHORT).show()
+        }
+        ClickDropDownMenuItem(5){
             gridCellCountChanged.invoke(5)
             onStateChanged.invoke(false)
-        }, text = { Text("gridCellCount set 5") })
+        }
     }
+
+}
+
+@Composable
+private fun ClickDropDownMenuItem(cellCount: Int, onClickMenuItem: () -> Unit) {
+    val context = LocalContext.current
+    DropdownMenuItem(onClick = {
+        Toast.makeText(context, "gridCellCount set $cellCount", Toast.LENGTH_SHORT).show()
+        onClickMenuItem.invoke()
+    }, text = { Text("gridCellCount set $cellCount") })
 
 }
 
@@ -317,8 +285,8 @@ private fun FloatActionContent(
                     coroutines.launch {
                         var targetPosition =
                             (state.layoutInfo.visibleItemsInfo.firstOrNull()?.index.ignoreNull()) - (gridCellCount * 2)
-
                         targetPosition = if (targetPosition <= 0) 0 else targetPosition
+
                         state.animateScrollToItem(targetPosition)
                     }
                 },
@@ -330,9 +298,10 @@ private fun FloatActionContent(
         Image(modifier = Modifier
             .clickable {
                 coroutines.launch {
-                    var targetPosition =(state.layoutInfo.visibleItemsInfo.firstOrNull()?.index.ignoreNull()) + (gridCellCount * 4)
-
+                    var targetPosition =
+                        (state.layoutInfo.visibleItemsInfo.firstOrNull()?.index.ignoreNull()) + (gridCellCount * 4)
                     targetPosition = if (targetPosition > lastIndex) lastIndex else targetPosition
+
                     state.animateScrollToItem(targetPosition)
                 }
             }
@@ -361,7 +330,6 @@ private fun ImageItem(
     var scale by remember { mutableStateOf(1f) }
     
     var bitmap: Bitmap? by remember { mutableStateOf(null) }
-    
 
     ConstraintLayout(modifier = Modifier
         .fillMaxWidth()
@@ -370,60 +338,50 @@ private fun ImageItem(
         val painter1 = rememberAsyncImagePainter(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(imageUrl)
-                .listener { request, result ->
+                .listener { _, result ->
                     bitmap = (result.drawable  as BitmapDrawable).bitmap
                 }
                 .size(Size.ORIGINAL)
                 .build()
         )
 
-        painter1.state.painter?.let {
-
-            Image(
-                painter = it,
-                contentDescription = null,
-                modifier = Modifier
-                    .graphicsLayer(
-                        scaleX = scale, scaleY = scale
-                    )
-                    .pointerInput(Unit) {
-                        detectTapGestures(onLongPress = {
-                            coroutines.launch {
-                                delay(100)
-                                onImageLongClicked.invoke()
+        val aa by remember { derivedStateOf {painter1} }
+        Image(
+            painter = aa,
+            contentDescription = null,
+            modifier = Modifier
+                .graphicsLayer(
+                    scaleX = scale, scaleY = scale
+                )
+                .pointerInput(Unit) {
+                    detectTapGestures(onLongPress = {
+                        coroutines.launch {
+                            delay(10)
+                            onImageLongClicked.invoke()
+                        }
+                    }, onTap = {
+                        val url = item.fullHDURL ?: item.largeImageURL ?: item.imageURL
+                        ?: item.previewURL
+                        url?.let { openImageDetail.invoke(it) }
+                    },
+                        onDoubleTap = {
+                            if (isZoomed) {
+                                scale = 1f
+                                isZoomed = false
+                                return@detectTapGestures
                             }
-                        }, onTap = {
-                            val url =
-                                item.fullHDURL ?: item.largeImageURL ?: item.imageURL
-                                ?: item.previewURL
-
-                            url?.let {
-                                openImageDetail.invoke(it)
-                            }
-                        },
-
-                            onDoubleTap = {
-                                if (isZoomed) {
-                                    scale = 1f
-                                    isZoomed = false
-                                    return@detectTapGestures
-                                }
-                                scale = ((1f * (1.0 + (gridCellCount * 0.1))).toFloat())
-                                isZoomed = true
-                            })
-                    }
-                    .fillMaxWidth()
-                    .size(120.dp),
-                contentScale = ContentScale.FillBounds
-            )
-        }
-
-
+                            scale = ((1f * (1.0 + (gridCellCount * 0.1))).toFloat())
+                            isZoomed = true
+                        })
+                }
+                .fillMaxWidth()
+                .size(120.dp),
+            contentScale = ContentScale.FillBounds
+        )
 
         if (shouldCheckBoxVisible) {
             Checkbox(
-                checked = isChecked,
-                enabled = true,
+                checked = isChecked, enabled = true,
                 modifier = Modifier
                     .padding(6.dp)
                     .constrainAs(checkBox) {
@@ -432,14 +390,10 @@ private fun ImageItem(
                     },
                 onCheckedChange = {
                     coroutines.launch {
-                        bitmap?.let { it1 ->
-                            onSelectedImage.invoke(item.uuId, it1, it)
-                        }
+                        bitmap?.let { it1 -> onSelectedImage.invoke(item.uuId, it1, it) }
                     }
                 },
-                colors = CheckboxDefaults.colors(
-                    checkedColor = Color.Blue, uncheckedColor = Color.White
-                )
+                colors = CheckboxDefaults.colors(checkedColor = Color.Blue, uncheckedColor = Color.White)
             )
         }
     }
