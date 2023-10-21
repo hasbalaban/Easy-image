@@ -24,7 +24,7 @@ class TestViewModel @Inject constructor() : ViewModel() {
     }
 
     fun getPhotos(
-        query: String = "Sun",
+        query: String = "planet",
         shouldClearPhotos : Boolean = false
     ){
         var queryText = query
@@ -34,7 +34,7 @@ class TestViewModel @Inject constructor() : ViewModel() {
         }
 
         if (queryText.isEmpty()){
-            queryText = "sun"
+            queryText = "planet"
             currentImageRequestPage = 1
         }
 

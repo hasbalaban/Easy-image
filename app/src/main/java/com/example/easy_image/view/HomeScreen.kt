@@ -92,7 +92,7 @@ fun HomeScreen(
     val photos = viewModel.photos.observeAsState()
     val state = rememberLazyGridState()
     val shouldGetNewPage by remember { derivedStateOf { (state.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0) >= ((photos.value?.hits?.size ?: 1) * 0.8) } }
-    var searchedImageText by remember { mutableStateOf("sun") }
+    var searchedImageText by remember { mutableStateOf("planet") }
     var gridCellCount by remember { mutableStateOf(1) }
 
     var shouldCheckBoxVisible by remember { mutableStateOf(false) }
