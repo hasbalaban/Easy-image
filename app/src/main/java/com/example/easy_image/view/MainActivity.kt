@@ -3,11 +3,13 @@ package com.example.easy_image.view
 import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -19,21 +21,26 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.easy_image.NavigationDirections
 import com.example.easy_image.ui.theme.SaveWhattsappMediaTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
+import com.example.easy_image.R
 
 
 class MainActivity : ComponentActivity() {
@@ -41,6 +48,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+
+            val navController = rememberNavController()
             SaveWhattsappMediaTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
@@ -50,11 +59,15 @@ class MainActivity : ComponentActivity() {
 
                     Scaffold(
                         bottomBar = {
-                            BottomBar()
+                            val navBackStackEntry by navController.currentBackStackEntryAsState()
+                            val currentRoute = navBackStackEntry?.destination?.route
+                            if (currentRoute != NavigationDirections.DetailScreen.route) {
+                                BottomBar(navController)
+                            }
                         }
                     ) {it ->
 
-                        MainNavHost(it)
+                        MainNavHost(it, navController)
                     }
 
                 }
@@ -62,9 +75,8 @@ class MainActivity : ComponentActivity() {
         }
     }
     @Composable
-    fun MainNavHost(paddingValues: PaddingValues) {
+    fun MainNavHost(paddingValues: PaddingValues, navController: NavHostController) {
         val context = LocalContext.current
-        val navController = rememberNavController()
 
         NavHost(
             modifier = Modifier.padding(paddingValues),
@@ -83,6 +95,14 @@ class MainActivity : ComponentActivity() {
                 DisposableEffect(LocalLifecycleOwner.current) {
                     onDispose { coroutines.cancel()}
                 }
+            }
+
+            composable(NavigationDirections.Favorite.route) {
+
+            }
+
+            composable(NavigationDirections.Video.route) {
+
             }
 
             composable(NavigationDirections.SearchScreen.route) {
@@ -121,42 +141,53 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun BottomBar(){
-        val context = LocalContext.current
-        Toast.makeText(context, "Test", Toast.LENGTH_SHORT).show()
+    private fun BottomBar(navController: NavHostController) {
 
-        BottomAppBar(contentPadding = PaddingValues(bottom = 16.dp)) {
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentRoute = navBackStackEntry?.destination?.route
+
+        BottomAppBar(windowInsets = WindowInsets.ime) {
+
             NavigationBarItem(
-                selected = false,
+                selected = currentRoute == NavigationDirections.HomeScreen.route,
                 onClick = {
-
+                    if (currentRoute != NavigationDirections.HomeScreen.route) navController.navigate(NavigationDirections.HomeScreen.route)
                 },
                 icon = {
-
+                       Image(
+                           modifier = Modifier.padding(horizontal = 2.dp),
+                           colorFilter = ColorFilter.tint(Color.Blue),
+                           painter = painterResource(id = R.drawable.ic_home), contentDescription = NavigationDirections.HomeScreen.route)
                 },
                 label = {
                     Text(text = "Images", color = Color.Black)
                 }
             )
             NavigationBarItem(
-                selected = false,
+                selected = currentRoute == NavigationDirections.Favorite.route,
                 onClick = {
-
-                },
+                    if (currentRoute != NavigationDirections.Favorite.route) navController.navigate(NavigationDirections.Favorite.route)
+                          },
                 icon = {
-
+                    Image(
+                        modifier = Modifier.padding(horizontal = 2.dp),
+                        colorFilter = ColorFilter.tint(Color.Blue),
+                        painter = painterResource(id = R.drawable.ic_favorite), contentDescription = NavigationDirections.Favorite.route)
                 },
                 label = {
                     Text(text = "Favorite", color = Color.Black)
                 }
             )
             NavigationBarItem(
-                selected = false,
+                selected = currentRoute == NavigationDirections.Video.route,
                 onClick = {
-
-                },
+                    if (currentRoute != NavigationDirections.Video.route) navController.navigate(NavigationDirections.Video.route)
+                          },
                 icon = {
-
+                    Image(
+                        modifier = Modifier.padding(horizontal = 2.dp),
+                        colorFilter = ColorFilter.tint(Color.Blue),
+                        painter = painterResource(id = R.drawable.ic_video), contentDescription = NavigationDirections.Video.route)
                 },
                 label = {
                     Text(text = "Video", color = Color.Black)
@@ -171,7 +202,8 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun GreetingPreview() {
         SaveWhattsappMediaTheme {
-            MainNavHost(PaddingValues())
+            val navController = rememberNavController()
+            MainNavHost(PaddingValues(), navController)
         }
     }
 }

@@ -19,6 +19,10 @@ class TestViewModel @Inject constructor() : ViewModel() {
     val photos : LiveData<ImageResponse?> get() = _photos
     private var currentImageRequestPage = 1
 
+    fun updatePhotos(photos: ImageResponse?){
+        _photos.value = photos
+    }
+
     fun getPhotos(
         query: String = "Sun",
         shouldClearPhotos : Boolean = false

@@ -25,7 +25,6 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
@@ -34,7 +33,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -49,6 +47,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -63,11 +62,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
@@ -77,6 +73,9 @@ import com.example.easy_image.R
 import com.example.easy_image.SaveImageToCacheAndShare
 import com.example.easy_image.TestViewModel
 import com.example.easy_image.ignoreNull
+import com.example.easy_image.model.Favorite
+import com.example.easy_image.model.FavoriteDTO
+import com.example.easy_image.model.Favorites
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -98,7 +97,10 @@ fun HomeScreen(
     var gridCellCount by remember { mutableStateOf(1) }
 
     var shouldCheckBoxVisible by remember { mutableStateOf(false) }
+
     val selectedImages: SnapshotStateList<Pair<Long, Bitmap>> = remember { mutableStateListOf() }
+    val favoriteImageList by remember { mutableStateOf(ArrayList<FavoriteDTO>()) }
+
     var dropDownMenuExpanded by remember { mutableStateOf(false) }
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -205,7 +207,17 @@ fun HomeScreen(
                                 if (shouldCheckBoxVisible) selectedImages.clear()
                             },
                             isChecked = isChecked, coroutines = coroutines,
-                            shouldCheckBoxVisible = shouldCheckBoxVisible
+                            shouldCheckBoxVisible = shouldCheckBoxVisible,
+                            onClickFavoriteButton = {favorite ->
+                                if (favoriteImageList.contains(favorite)) {
+                                    favoriteImageList.remove(favorite)
+                                    false
+                                }
+                                else {
+                                    favoriteImageList.add(favorite)
+                                    true
+                                }
+                            }
                         ) { uuId, bitmap, checked ->
 
                             if (checked) selectedImages.add(Pair(first = uuId, second = bitmap))
@@ -316,6 +328,7 @@ private fun ImageItem(
     isChecked: Boolean,
     coroutines: CoroutineScope,
     shouldCheckBoxVisible: Boolean,
+    onClickFavoriteButton : (FavoriteDTO) -> Boolean,
     onSelectedImage: (Long, Bitmap, Boolean) -> Unit,
 ) {
     var isZoomed by remember { mutableStateOf(false) }
@@ -323,6 +336,8 @@ private fun ImageItem(
     var scale by remember { mutableStateOf(1f) }
     
     var bitmap: Bitmap? by remember { mutableStateOf(null) }
+
+    var isFavorite by remember { mutableStateOf(Favorite.favoriteImageList.imageList.contains(FavoriteDTO(imageUrl = imageUrl ?: "", uuId = item.uuId))) }
 
     ConstraintLayout(modifier = Modifier
         .fillMaxWidth()
@@ -339,6 +354,7 @@ private fun ImageItem(
         )
 
         val aa by remember { derivedStateOf {painter1} }
+
         Image(
             painter = aa,
             contentDescription = null,
@@ -371,6 +387,20 @@ private fun ImageItem(
                 .size(120.dp),
             contentScale = ContentScale.FillBounds
         )
+
+        Image(modifier = Modifier
+            .clickable {
+                isFavorite = onClickFavoriteButton.invoke(FavoriteDTO(imageUrl = imageUrl ?: "", uuId = item.uuId))
+            }
+            .padding(6.dp),
+            painter = painterResource(id = R.drawable.ic_favorite),
+            contentDescription = "select favorite",
+            colorFilter = ColorFilter.tint(
+                if (isFavorite) Color.Yellow
+                else Color.White
+            )
+        )
+
 
         if (shouldCheckBoxVisible) {
             Checkbox(
