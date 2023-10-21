@@ -108,6 +108,9 @@ class MainActivity : ComponentActivity() {
             }
 
             composable(NavigationDirections.Favorite.route) {
+                val openImageDetail = { imageUrl : String ->
+                    navController.navigate(NavigationDirections.DetailScreen.createRoute(imageUrl = imageUrl))
+                }
 
                 FavoriteScreen(openImageDetail)
             }
