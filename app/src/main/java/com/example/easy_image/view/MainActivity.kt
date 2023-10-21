@@ -37,17 +37,29 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.easy_image.NavigationDirections
+import com.example.easy_image.R
 import com.example.easy_image.ui.theme.SaveWhattsappMediaTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
-import com.example.easy_image.R
+import kotlin.system.measureTimeMillis
 
 
 class MainActivity : ComponentActivity() {
+
+    init {
+        System.loadLibrary("cpp_code")
+    }
+
+    external fun myNativeFunction(a: Int, b: Int): Int
+
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+
+            testcpp()
+
+            return@setContent
 
             val navController = rememberNavController()
             SaveWhattsappMediaTheme {
@@ -69,6 +81,8 @@ class MainActivity : ComponentActivity() {
 
                         MainNavHost(it, navController)
                     }
+
+
 
                 }
             }
@@ -195,6 +209,25 @@ class MainActivity : ComponentActivity() {
             )
 
         }
+    }
+
+    // test cpp and kotlin
+    fun yNativeFunction(a: Int, b: Int): Int {
+        for (i in 0..100000) {
+            if (i == 999) {
+                return i
+            }
+        }
+        return 0
+    }
+    private fun testcpp(){
+        myNativeFunction(1,2)
+        val time = measureTimeMillis {
+            for (i in 0..1){
+                myNativeFunction(1,1)
+            }
+        }
+        println(time)
     }
 
 
