@@ -59,8 +59,6 @@ class MainActivity : ComponentActivity() {
 
             testcpp()
 
-            return@setContent
-
             val navController = rememberNavController()
             SaveWhattsappMediaTheme {
                 // A surface container using the 'background' color from the theme
