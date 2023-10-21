@@ -57,8 +57,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
 
-            testcpp()
-
             val navController = rememberNavController()
             SaveWhattsappMediaTheme {
                 // A surface container using the 'background' color from the theme
@@ -111,6 +109,7 @@ class MainActivity : ComponentActivity() {
 
             composable(NavigationDirections.Favorite.route) {
 
+                FavoriteScreen(openImageDetail)
             }
 
             composable(NavigationDirections.Video.route) {

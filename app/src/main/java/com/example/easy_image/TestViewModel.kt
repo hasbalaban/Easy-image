@@ -53,12 +53,15 @@ class TestViewModel @Inject constructor() : ViewModel() {
                 )
                 photos?.let {
                     val images: List<Hits>? = it.hits?.let { newList ->
-                        val range = (0L..Long.MAX_VALUE)
-                        newList.forEach {
-                            it.uuId = range.random()
+
+                        newList.forEach{item ->
                         }
 
                         (_photos.value?.hits ?: mutableListOf()).plus(newList)
+                    }
+
+                    images?.forEach {item ->
+                        item.isFavorite = SavedImages.savedImages.any { it.id == item.id }
                     }
 
                     _photos.value = it.copy(

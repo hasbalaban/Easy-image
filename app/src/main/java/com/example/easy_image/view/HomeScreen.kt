@@ -47,7 +47,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -71,11 +70,11 @@ import coil.size.Size
 import com.example.easy_image.Hits
 import com.example.easy_image.R
 import com.example.easy_image.SaveImageToCacheAndShare
+import com.example.easy_image.SavedImages
 import com.example.easy_image.TestViewModel
 import com.example.easy_image.ignoreNull
 import com.example.easy_image.model.Favorite
 import com.example.easy_image.model.FavoriteDTO
-import com.example.easy_image.model.Favorites
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -98,7 +97,7 @@ fun HomeScreen(
 
     var shouldCheckBoxVisible by remember { mutableStateOf(false) }
 
-    val selectedImages: SnapshotStateList<Pair<Long, Bitmap>> = remember { mutableStateListOf() }
+    val selectedImages: SnapshotStateList<Pair<Int, Bitmap>> = remember { mutableStateListOf() }
     val favoriteImageList by remember { mutableStateOf(ArrayList<FavoriteDTO>()) }
 
     var dropDownMenuExpanded by remember { mutableStateOf(false) }
@@ -195,11 +194,11 @@ fun HomeScreen(
                     items(
                         items = it,
                         key = {
-                            it.uuId
+                            it.id
                         }
                     ) { item ->
 
-                        val isChecked = selectedImages.any { it.first == item.uuId }
+                        val isChecked = selectedImages.any { it.first == item.id }
                         ImageItem(
                             gridCellCount, item, openImageDetail,
                             {
@@ -211,17 +210,19 @@ fun HomeScreen(
                             onClickFavoriteButton = {favorite ->
                                 if (favoriteImageList.contains(favorite)) {
                                     favoriteImageList.remove(favorite)
+                                    SavedImages.savedImages = favoriteImageList
                                     false
                                 }
                                 else {
                                     favoriteImageList.add(favorite)
+                                    SavedImages.savedImages = favoriteImageList
                                     true
                                 }
                             }
-                        ) { uuId, bitmap, checked ->
+                        ) { id, bitmap, checked ->
 
-                            if (checked) selectedImages.add(Pair(first = uuId, second = bitmap))
-                            else selectedImages.firstOrNull { it.first == uuId }?.let { selectedImages.remove(it) }
+                            if (checked) selectedImages.add(Pair(first = id, second = bitmap))
+                            else selectedImages.firstOrNull { it.first == id }?.let { selectedImages.remove(it) }
                         }
                     }
                 }
@@ -329,7 +330,7 @@ private fun ImageItem(
     coroutines: CoroutineScope,
     shouldCheckBoxVisible: Boolean,
     onClickFavoriteButton : (FavoriteDTO) -> Boolean,
-    onSelectedImage: (Long, Bitmap, Boolean) -> Unit,
+    onSelectedImage: (Int, Bitmap, Boolean) -> Unit,
 ) {
     var isZoomed by remember { mutableStateOf(false) }
     val imageUrl by remember { mutableStateOf(item.imageURL ?: item.largeImageURL ?: item.fullHDURL ?: item.previewURL) }
@@ -337,7 +338,7 @@ private fun ImageItem(
     
     var bitmap: Bitmap? by remember { mutableStateOf(null) }
 
-    var isFavorite by remember { mutableStateOf(Favorite.favoriteImageList.imageList.contains(FavoriteDTO(imageUrl = imageUrl ?: "", uuId = item.uuId))) }
+    var isFavorite by remember { mutableStateOf(item.isFavorite) }
 
     ConstraintLayout(modifier = Modifier
         .fillMaxWidth()
@@ -390,7 +391,7 @@ private fun ImageItem(
 
         Image(modifier = Modifier
             .clickable {
-                isFavorite = onClickFavoriteButton.invoke(FavoriteDTO(imageUrl = imageUrl ?: "", uuId = item.uuId))
+                isFavorite = onClickFavoriteButton.invoke(FavoriteDTO(imageUrl = imageUrl ?: "", id = item.id))
             }
             .padding(6.dp),
             painter = painterResource(id = R.drawable.ic_favorite),
@@ -413,7 +414,7 @@ private fun ImageItem(
                     },
                 onCheckedChange = {
                     coroutines.launch {
-                        bitmap?.let { it1 -> onSelectedImage.invoke(item.uuId, it1, it) }
+                        bitmap?.let { it1 -> onSelectedImage.invoke(item.id, it1, it) }
                     }
                 },
                 colors = CheckboxDefaults.colors(checkedColor = Color.Blue, uncheckedColor = Color.White)

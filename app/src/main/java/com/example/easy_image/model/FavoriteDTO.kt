@@ -5,7 +5,7 @@ data class Favorites(
 )
 
 data class FavoriteDTO(
-    val uuId : Long,
+    val id : Int,
     val imageUrl : String
 )
 
