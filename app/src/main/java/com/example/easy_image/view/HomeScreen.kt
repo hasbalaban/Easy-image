@@ -64,8 +64,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import coil.EventListener
+import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
+import coil.disk.DiskCache
+import coil.memory.MemoryCache
 import coil.request.ImageRequest
+import coil.request.SuccessResult
 import coil.size.Size
 import com.example.easy_image.Hits
 import com.example.easy_image.R
@@ -354,10 +359,40 @@ private fun ImageItem(
                 .build()
         )
 
-        val aa by remember { derivedStateOf {painter1} }
+        val context = LocalContext.current
+
+
+        val eventListener = object : EventListener{
+            override fun onSuccess(request: ImageRequest, result: SuccessResult) {
+                super.onSuccess(request, result)
+                ImageRequest.Builder(context)
+                    .data(imageUrl)
+                    .listener { _, _ ->
+                        bitmap = (result.drawable  as BitmapDrawable).bitmap
+                    }
+                    .size(Size.ORIGINAL)
+                    .build()
+            }
+        }
+
+        ImageLoader.Builder(context)
+            .memoryCache {
+                MemoryCache.Builder(context)
+                    .maxSizePercent(0.65)
+                    .build()
+            }
+            .diskCache {
+                DiskCache.Builder()
+                    .directory(context.cacheDir.resolve("image_cache"))
+                    .maxSizePercent(0.4)
+                    .build()
+            }
+            .eventListener(listener = eventListener)
+            .build()
+        val deliveredPainter by remember { derivedStateOf {painter1} }
 
         Image(
-            painter = aa,
+            painter = deliveredPainter,
             contentDescription = null,
             modifier = Modifier
                 .graphicsLayer(
