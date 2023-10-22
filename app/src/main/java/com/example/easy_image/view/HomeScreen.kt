@@ -172,6 +172,7 @@ fun HomeScreen(
 
                     }) {
                         Image(
+                            modifier = Modifier.padding(start = 6.dp),
                             painter = painterResource(id = R.drawable.share_icon),
                             contentDescription = "save All images"
                         )
