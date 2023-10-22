@@ -160,7 +160,9 @@ fun HomeScreen(
                 )
 
                 if (selectedImages.isEmpty().not()) {
-                    Button(onClick = {
+                    Button(
+                        modifier = Modifier.padding(start = 12.dp),
+                        onClick = {
 
                         selectedImages.map { it.second }.let {
                             val first = it.first().asImageBitmap()
@@ -172,7 +174,6 @@ fun HomeScreen(
 
                     }) {
                         Image(
-                            modifier = Modifier.padding(start = 6.dp),
                             painter = painterResource(id = R.drawable.share_icon),
                             contentDescription = "save All images"
                         )
