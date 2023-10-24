@@ -38,19 +38,14 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
 import com.example.easy_image.R
-import com.example.easy_image.SavedImages
 import com.example.easy_image.model.FavoriteDTO
 
 @Composable
-fun FavoriteScreen(navController: NavController, openImageDetail: (String) -> Unit) {
-    val images: SnapshotStateList<FavoriteDTO> = remember { mutableStateListOf() }
-    LaunchedEffect(key1 = Unit){
-        images.addAll(SavedImages.savedImages)
-    }
+fun FavoriteScreen(navController: NavController, openImageDetail: (String) -> Unit, favoriteImages: SnapshotStateList<FavoriteDTO>, addOrRemoveFromFavoriteList : (FavoriteDTO) -> Unit) {
 
 
     Column(modifier = Modifier.fillMaxSize()) {
-        if (images.isEmpty()){
+        if (favoriteImages.isEmpty()){
             CenterTextView(
                 text = "There is not favorite images Here",
                 textButton = "Let's find same your favorite images",
@@ -68,14 +63,13 @@ fun FavoriteScreen(navController: NavController, openImageDetail: (String) -> Un
                 userScrollEnabled = true
             ) {
 
-             items(images,
+             items(favoriteImages,
              key = {
                  it.id
              }
                  ){
                  ImageItem(it, deleteFromImage = {
-                     images.remove(it)
-                     SavedImages.savedImages.remove(it)
+                     addOrRemoveFromFavoriteList.invoke(it)
                  }){
                      openImageDetail(it)
                  }

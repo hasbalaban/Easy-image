@@ -19,6 +19,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -38,6 +39,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.easy_image.NavigationDirections
 import com.example.easy_image.R
+import com.example.easy_image.model.FavoriteDTO
 import com.example.easy_image.ui.theme.SaveWhattsappMediaTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -88,6 +90,9 @@ class MainActivity : ComponentActivity() {
     fun MainNavHost(paddingValues: PaddingValues, navController: NavHostController) {
         val context = LocalContext.current
 
+        val favoriteImages : SnapshotStateList<FavoriteDTO> = remember { mutableStateListOf() }
+
+
         NavHost(
             modifier = Modifier.padding(paddingValues),
             navController = navController, startDestination = NavigationDirections.HomeScreen.route ) {
@@ -100,7 +105,22 @@ class MainActivity : ComponentActivity() {
                     navController.navigate(NavigationDirections.DetailScreen.createRoute(imageUrl = imageUrl))
                 }
 
-                HomeScreen(openImageDetail, coroutines = coroutines)
+                HomeScreen(openImageDetail, coroutines = coroutines, favoriteImages = favoriteImages, addOrRemoveFromFavoriteList = {favorite ->
+                    if (favoriteImages.any {
+                        it.id == favorite.id
+                        })
+                    {
+                        favoriteImages.removeIf{
+                            it.id == favorite.id
+                        }
+                        false
+                    }
+                    else
+                    {
+                        favoriteImages.add(favorite)
+                        true
+                    }
+                })
 
 
                 val lifeCycleOwner = LocalLifecycleOwner.current
@@ -124,7 +144,9 @@ class MainActivity : ComponentActivity() {
                     navController.navigate(NavigationDirections.DetailScreen.createRoute(imageUrl = imageUrl))
                 }
 
-                FavoriteScreen(navController, openImageDetail)
+                FavoriteScreen(navController, openImageDetail, favoriteImages = favoriteImages){
+                    favoriteImages.remove(it)
+                }
             }
 
             composable(NavigationDirections.Video.route) {

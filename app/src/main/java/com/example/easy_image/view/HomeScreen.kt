@@ -64,6 +64,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.EventListener
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
@@ -75,10 +76,8 @@ import coil.size.Size
 import com.example.easy_image.Hits
 import com.example.easy_image.R
 import com.example.easy_image.SaveImageToCacheAndShare
-import com.example.easy_image.SavedImages
 import com.example.easy_image.TestViewModel
 import com.example.easy_image.ignoreNull
-import com.example.easy_image.model.Favorite
 import com.example.easy_image.model.FavoriteDTO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -90,7 +89,9 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     openImageDetail: (String) -> Unit,
     coroutines: CoroutineScope,
-    viewModel: TestViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    favoriteImages: SnapshotStateList<FavoriteDTO>,
+    addOrRemoveFromFavoriteList: (FavoriteDTO) -> Boolean,
+    viewModel: TestViewModel = viewModel()
 ) {
     val context = LocalContext.current
 
@@ -102,8 +103,7 @@ fun HomeScreen(
 
     var shouldCheckBoxVisible by remember { mutableStateOf(false) }
 
-    val selectedImages: SnapshotStateList<Pair<Int, Bitmap>> = remember { mutableStateListOf() }
-    val favoriteImageList by remember { mutableStateOf(ArrayList<FavoriteDTO>()) }
+    val selectedImagesToShare: SnapshotStateList<Pair<Int, Bitmap>> = remember { mutableStateListOf() }
 
     var dropDownMenuExpanded by remember { mutableStateOf(false) }
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -161,12 +161,12 @@ fun HomeScreen(
                     },
                 )
 
-                if (selectedImages.isEmpty().not()) {
+                if (selectedImagesToShare.isEmpty().not()) {
                     Button(
                         modifier = Modifier.padding(start = 12.dp),
                         onClick = {
 
-                        selectedImages.map { it.second }.let {
+                        selectedImagesToShare.map { it.second }.let {
                             val first = it.first().asImageBitmap()
                             val second = it.getOrNull(1)?.asImageBitmap()
                             second?.let {
@@ -207,31 +207,27 @@ fun HomeScreen(
                         }
                     ) { item ->
 
-                        val isChecked = selectedImages.any { it.first == item.id }
+                        val isChecked = selectedImagesToShare.any { it.first == item.id }
+                        val imageUrl by remember { mutableStateOf(item.imageURL ?: item.largeImageURL ?: item.fullHDURL ?: item.previewURL) }
+
+
                         ImageItem(
                             gridCellCount, item, openImageDetail,
                             {
                                 shouldCheckBoxVisible = shouldCheckBoxVisible.not()
-                                if (shouldCheckBoxVisible) selectedImages.clear()
+                                if (shouldCheckBoxVisible) selectedImagesToShare.clear()
                             },
                             isChecked = isChecked, coroutines = coroutines,
                             shouldCheckBoxVisible = shouldCheckBoxVisible,
-                            onClickFavoriteButton = {favorite ->
-                                if (favoriteImageList.contains(favorite)) {
-                                    favoriteImageList.remove(favorite)
-                                    SavedImages.savedImages = favoriteImageList
-                                    false
-                                }
-                                else {
-                                    favoriteImageList.add(favorite)
-                                    SavedImages.savedImages = favoriteImageList
-                                    true
-                                }
+                            imageUrl = imageUrl ?: "",
+                            favoriteImages = favoriteImages,
+                            onClickFavoriteButton = { favorite ->
+                                addOrRemoveFromFavoriteList.invoke(favorite)
                             }
                         ) { id, bitmap, checked ->
 
-                            if (checked) selectedImages.add(Pair(first = id, second = bitmap))
-                            else selectedImages.firstOrNull { it.first == id }?.let { selectedImages.remove(it) }
+                            if (checked) selectedImagesToShare.add(Pair(first = id, second = bitmap))
+                            else selectedImagesToShare.firstOrNull { it.first == id }?.let { selectedImagesToShare.remove(it) }
                         }
                     }
                 }
@@ -338,16 +334,19 @@ private fun ImageItem(
     isChecked: Boolean,
     coroutines: CoroutineScope,
     shouldCheckBoxVisible: Boolean,
-    onClickFavoriteButton : (FavoriteDTO) -> Boolean,
+    imageUrl: String,
+    favoriteImages: SnapshotStateList<FavoriteDTO>,
+    onClickFavoriteButton: (FavoriteDTO) -> Boolean,
     onSelectedImage: (Int, Bitmap, Boolean) -> Unit,
 ) {
     var isZoomed by remember { mutableStateOf(false) }
-    val imageUrl by remember { mutableStateOf(item.imageURL ?: item.largeImageURL ?: item.fullHDURL ?: item.previewURL) }
     var scale by remember { mutableStateOf(1f) }
     
     var bitmap: Bitmap? by remember { mutableStateOf(null) }
 
-    var isFavorite by remember { mutableStateOf(item.isFavorite) }
+    var isFavorite by remember { mutableStateOf(favoriteImages.any {
+        it.id == item.id
+    }) }
 
     ConstraintLayout(modifier = Modifier
         .fillMaxWidth()
@@ -430,7 +429,7 @@ private fun ImageItem(
 
         Image(modifier = Modifier
             .clickable {
-                isFavorite = onClickFavoriteButton.invoke(FavoriteDTO(imageUrl = imageUrl ?: "", id = item.id))
+                isFavorite = onClickFavoriteButton.invoke(FavoriteDTO(item.id, imageUrl))
             }
             .padding(6.dp),
             painter = painterResource(id = R.drawable.ic_favorite),

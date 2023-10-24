@@ -60,9 +60,9 @@ class TestViewModel @Inject constructor() : ViewModel() {
                         (_photos.value?.hits ?: mutableListOf()).plus(newList)
                     }
 
-                    images?.forEach {item ->
-                        item.isFavorite = SavedImages.savedImages.any { it.id == item.id }
-                    }
+                  //  images?.forEach {item ->
+                      //  item.isFavorite = SavedImages.savedImages.any { it.id == item.id }
+                  //  }
 
                     _photos.value = it.copy(
                         hits = images
