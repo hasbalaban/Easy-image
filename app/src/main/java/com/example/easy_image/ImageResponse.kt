@@ -31,6 +31,3 @@ data class Hits (
     val user_id : String?,
     val user : String?,
     val userImageURL : String?)
-{
-    var isFavorite : Boolean = false
-}
