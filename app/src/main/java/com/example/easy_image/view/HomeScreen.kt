@@ -129,7 +129,9 @@ fun HomeScreen(
     }
 
     Scaffold(modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection), topBar = {
-        TopAppBar(title = {
+        TopAppBar(
+            modifier = Modifier.padding(top = 6.dp),
+            title = {
 
             OutlinedTextField(
                 value = searchedImageText,
@@ -146,7 +148,7 @@ fun HomeScreen(
                 placeholder = ({ Text(text = "search image") })
             )
         },
-            colors = TopAppBarDefaults.smallTopAppBarColors(Color.LightGray),
+            colors = TopAppBarDefaults.smallTopAppBarColors(),
             scrollBehavior = scrollBehavior,
             actions = {
                 DropDownMenu(
