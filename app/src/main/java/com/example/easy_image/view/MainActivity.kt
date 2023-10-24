@@ -102,8 +102,20 @@ class MainActivity : ComponentActivity() {
 
                 HomeScreen(openImageDetail, coroutines = coroutines)
 
+
+                val lifeCycleOwner = LocalLifecycleOwner.current
                 DisposableEffect(LocalLifecycleOwner.current) {
-                    onDispose { coroutines.cancel()}
+                    val observer = LifecycleEventObserver { _, event ->
+                        when (event){
+                            Lifecycle.Event.ON_RESUME -> ""
+                            else -> ""
+                        }
+                    }
+                    lifeCycleOwner.lifecycle.addObserver(observer)
+                    onDispose {
+                        onDispose { coroutines.cancel()}
+                        lifeCycleOwner.lifecycle.removeObserver(observer)
+                    }
                 }
             }
 
@@ -112,7 +124,7 @@ class MainActivity : ComponentActivity() {
                     navController.navigate(NavigationDirections.DetailScreen.createRoute(imageUrl = imageUrl))
                 }
 
-                FavoriteScreen(openImageDetail)
+                FavoriteScreen(navController, openImageDetail)
             }
 
             composable(NavigationDirections.Video.route) {
@@ -136,6 +148,7 @@ class MainActivity : ComponentActivity() {
                 }
 
                 DisposableEffect(LocalLifecycleOwner.current) {
+
                     val observer = LifecycleEventObserver { _, event ->
                         activity.requestedOrientation = when (event){
                             Lifecycle.Event.ON_RESUME ->  {
