@@ -42,6 +42,7 @@ fun VideoScreen (navController: NavController){
             PlayerView(context).apply {
                 player = mExoPlayer
                 controllerShowTimeoutMs = 2000
+                mExoPlayer.volume = 1f
             }
         })
     }
