@@ -44,9 +44,7 @@ fun VideoScreen(
     val videos = viewModel.videos.observeAsState()
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Red),
+        modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center
     ) {
         val dataSourceFactory = DefaultDataSourceFactory(
@@ -56,9 +54,9 @@ fun VideoScreen(
 
 
         videos.value?.hits?.let {
-            LazyColumn(modifier = Modifier.padding(top = 20.dp)) {
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(it) {
-                    Column() {
+                    Column(modifier = Modifier.padding(top = 20.dp).fillMaxWidth()) {
 
                         val videoURL =it.videos?.medium?.url
                         val source = ProgressiveMediaSource.Factory(dataSourceFactory)
