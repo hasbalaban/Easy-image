@@ -150,7 +150,7 @@ class MainActivity : ComponentActivity() {
             }
 
             composable(NavigationDirections.Video.route) {
-
+                VideoScreen(navController = navController)
             }
 
             composable(NavigationDirections.SearchScreen.route) {
