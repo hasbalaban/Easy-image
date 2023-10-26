@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.easy_image.model.Hits
 import com.example.easy_image.model.ImageResponse
+import com.example.easy_image.service.ImageService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
@@ -16,14 +17,10 @@ import javax.inject.Inject
 import kotlin.Exception
 
 @HiltViewModel
-class HomeViewModel @Inject constructor() : ViewModel() {
+class HomeViewModel @Inject constructor(): MainViewModel() {
     private val _photos = MutableLiveData<ImageResponse?>()
     val photos : LiveData<ImageResponse?> get() = _photos
     private var currentImageRequestPage = 1
-
-    fun updatePhotos(photos: ImageResponse?){
-        _photos.value = photos
-    }
 
     fun getPhotos(
         query: String = "planet",
@@ -40,11 +37,11 @@ class HomeViewModel @Inject constructor() : ViewModel() {
             currentImageRequestPage = 1
         }
 
-        val photoService: PhotoApiService = Retrofit.Builder()
+        val photoService: ImageService = Retrofit.Builder()
             .baseUrl("https://pixabay.com/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(PhotoApiService::class.java)
+            .create(ImageService::class.java)
 
         try {
             viewModelScope.launch {
@@ -62,9 +59,6 @@ class HomeViewModel @Inject constructor() : ViewModel() {
                         (_photos.value?.hits ?: mutableListOf()).plus(newList)
                     }
 
-                  //  images?.forEach {item ->
-                      //  item.isFavorite = SavedImages.savedImages.any { it.id == item.id }
-                  //  }
 
                     _photos.value = it.copy(
                         hits = images
@@ -76,13 +70,4 @@ class HomeViewModel @Inject constructor() : ViewModel() {
             println(e.cause)
         }
     }
-}
-
-interface PhotoApiService {
-    @GET("api")
-    suspend fun getPhotos(
-        @Query("key") key: String,
-        @Query("q") query: String?,
-        @Query("page") page: Int
-    ) : ImageResponse?
 }
