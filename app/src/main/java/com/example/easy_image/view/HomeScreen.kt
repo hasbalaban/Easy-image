@@ -73,11 +73,11 @@ import coil.memory.MemoryCache
 import coil.request.ImageRequest
 import coil.request.SuccessResult
 import coil.size.Size
-import com.example.easy_image.Hits
+import com.example.easy_image.model.Hits
 import com.example.easy_image.R
-import com.example.easy_image.SaveImageToCacheAndShare
-import com.example.easy_image.TestViewModel
-import com.example.easy_image.ignoreNull
+import com.example.easy_image.utils.SaveImageToCacheAndShare
+import com.example.easy_image.viewmodel.HomeViewModel
+import com.example.easy_image.utils.ignoreNull
 import com.example.easy_image.model.FavoriteDTO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -91,7 +91,7 @@ fun HomeScreen(
     coroutines: CoroutineScope,
     favoriteImages: SnapshotStateList<FavoriteDTO>,
     addOrRemoveFromFavoriteList: (FavoriteDTO) -> Boolean,
-    viewModel: TestViewModel = viewModel()
+    viewModel: HomeViewModel = viewModel()
 ) {
     val context = LocalContext.current
 

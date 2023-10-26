@@ -14,7 +14,7 @@
         tools:ignore="ScopedStorage" />
     
     <application
-        android:name=".Application"
+        android:name=".application.Application"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:requestLegacyExternalStorage="true"

@@ -1,9 +1,11 @@
-package com.example.easy_image
+package com.example.easy_image.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.easy_image.model.Hits
+import com.example.easy_image.model.ImageResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
@@ -14,7 +16,7 @@ import javax.inject.Inject
 import kotlin.Exception
 
 @HiltViewModel
-class TestViewModel @Inject constructor() : ViewModel() {
+class HomeViewModel @Inject constructor() : ViewModel() {
     private val _photos = MutableLiveData<ImageResponse?>()
     val photos : LiveData<ImageResponse?> get() = _photos
     private var currentImageRequestPage = 1

@@ -1,4 +1,4 @@
-package com.example.easy_image
+package com.example.easy_image.utils
 
 import android.content.ContentValues
 import android.content.Context

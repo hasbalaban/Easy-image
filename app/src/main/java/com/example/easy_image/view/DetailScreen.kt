@@ -32,7 +32,7 @@ import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.request.SuccessResult
-import com.example.easy_image.SaveImageToCacheAndShare
+import com.example.easy_image.utils.SaveImageToCacheAndShare
 import com.example.easy_image.R
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch

@@ -1,4 +1,4 @@
-package com.example.easy_image
+package com.example.easy_image.model
 
 data class ImageResponse (
     val total : String?,

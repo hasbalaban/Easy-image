@@ -37,7 +37,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.easy_image.NavigationDirections
+import com.example.easy_image.utils.NavigationDirections
 import com.example.easy_image.R
 import com.example.easy_image.model.FavoriteDTO
 import com.example.easy_image.ui.theme.SaveWhattsappMediaTheme
@@ -200,7 +200,8 @@ class MainActivity : ComponentActivity() {
             NavigationBarItem(
                 selected = currentRoute == NavigationDirections.HomeScreen.route,
                 onClick = {
-                    if (currentRoute != NavigationDirections.HomeScreen.route) navController.navigate(NavigationDirections.HomeScreen.route)
+                    if (currentRoute != NavigationDirections.HomeScreen.route) navController.navigate(
+                        NavigationDirections.HomeScreen.route)
                 },
                 icon = {
                        Image(
@@ -215,7 +216,8 @@ class MainActivity : ComponentActivity() {
             NavigationBarItem(
                 selected = currentRoute == NavigationDirections.Favorite.route,
                 onClick = {
-                    if (currentRoute != NavigationDirections.Favorite.route) navController.navigate(NavigationDirections.Favorite.route)
+                    if (currentRoute != NavigationDirections.Favorite.route) navController.navigate(
+                        NavigationDirections.Favorite.route)
                           },
                 icon = {
                     Image(
@@ -230,7 +232,8 @@ class MainActivity : ComponentActivity() {
             NavigationBarItem(
                 selected = currentRoute == NavigationDirections.Video.route,
                 onClick = {
-                    if (currentRoute != NavigationDirections.Video.route) navController.navigate(NavigationDirections.Video.route)
+                    if (currentRoute != NavigationDirections.Video.route) navController.navigate(
+                        NavigationDirections.Video.route)
                           },
                 icon = {
                     Image(
