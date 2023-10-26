@@ -2,33 +2,30 @@ package com.example.easy_image.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.easy_image.model.Hits
 import com.example.easy_image.model.ImageResponse
+import com.example.easy_image.model.VideoItem
+import com.example.easy_image.model.VideoResponse
 import com.example.easy_image.service.ImageService
-import dagger.hilt.android.lifecycle.HiltViewModel
+import com.example.easy_image.service.VideoService
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.GET
-import retrofit2.http.Query
-import javax.inject.Inject
-import kotlin.Exception
 
-@HiltViewModel
-class HomeViewModel @Inject constructor(): MainViewModel() {
-    private val _photos = MutableLiveData<ImageResponse?>()
-    val photos : LiveData<ImageResponse?> get() = _photos
+class VideoViewModel : MainViewModel() {
+
+    private val _videos = MutableLiveData<VideoResponse?>()
+    val videos : LiveData<VideoResponse?> get() = _videos
     private var currentImageRequestPage = 1
 
-    fun getPhotos(
+    fun getVideos(
         query: String = "planet",
         shouldClearPhotos : Boolean = false
     ){
         var queryText = query
         if (shouldClearPhotos) {
-            _photos.value = null
+            _videos.value = null
             currentImageRequestPage = 1
         }
 
@@ -37,30 +34,29 @@ class HomeViewModel @Inject constructor(): MainViewModel() {
             currentImageRequestPage = 1
         }
 
-        val photoService: ImageService = Retrofit.Builder()
+        val videoService: VideoService = Retrofit.Builder()
             .baseUrl("https://pixabay.com/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(ImageService::class.java)
+            .create(VideoService::class.java)
 
         try {
             viewModelScope.launch {
-                val photos = photoService.getPhotos(
-                    key = "36463103-c2d65a399fefc8955088325ab",
-                    query = queryText,
+                val videos = videoService.getVideos(
+                    key = "39342921-c040c554a9e966b3202b73519",
+                    query = "river",
                     page = currentImageRequestPage
                 )
-                photos?.let {
-                    val images: List<Hits>? = it.hits?.let { newList ->
+                videos?.let {
+                    val images: List<VideoItem>? = it.hits?.let { newList ->
 
-                        newList.forEach{item ->
-                        }
+                        println(newList)
 
-                        (_photos.value?.hits ?: mutableListOf()).plus(newList)
+                        (_videos.value?.hits ?: mutableListOf()).plus(newList)
                     }
 
 
-                    _photos.value = it.copy(
+                    _videos.value = it.copy(
                         hits = images
                     )
                     currentImageRequestPage += 1
