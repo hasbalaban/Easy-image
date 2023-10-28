@@ -1,5 +1,6 @@
 package com.example.easy_image.view
 
+import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -33,12 +34,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
 import com.example.easy_image.R
 import com.example.easy_image.model.FavoriteDTO
+import com.example.easy_image.utils.permission.getPermissions
 
 @Composable
 fun FavoriteScreen(navController: NavController, openImageDetail: (String) -> Unit, favoriteImages: SnapshotStateList<FavoriteDTO>, addOrRemoveFromFavoriteList : (FavoriteDTO) -> Unit) {
@@ -71,7 +74,7 @@ fun FavoriteScreen(navController: NavController, openImageDetail: (String) -> Un
                  ImageItem(it, deleteFromImage = {
                      addOrRemoveFromFavoriteList.invoke(it)
                  }){
-                     openImageDetail(it)
+                     openImageDetail.invoke(it)
                  }
              }
 
@@ -118,6 +121,7 @@ private fun ImageItem(
     deleteFromImage: () -> Unit,
     openImageDetail: (String) -> Unit
 ) {
+    val context = LocalContext.current
 
     Box(
         contentAlignment = Alignment.TopEnd,
@@ -150,6 +154,8 @@ private fun ImageItem(
 
         Image(modifier = Modifier
             .clickable {
+                ActivityCompat.requestPermissions(context as Activity, getPermissions(), 1);
+                return@clickable
                 deleteFromImage.invoke()
             }
             .padding(6.dp),
