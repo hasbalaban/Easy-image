@@ -154,7 +154,7 @@ private fun ImageItem(
 
         Image(modifier = Modifier
             .clickable {
-                ActivityCompat.requestPermissions(context as Activity, getPermissions(), 1);
+                //ActivityCompat.requestPermissions(context as Activity, getPermissions(), 1);
                 deleteFromImage.invoke()
             }
             .padding(6.dp),
