@@ -1,6 +1,7 @@
 package com.example.easy_image.view
 
 import android.Manifest
+import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -8,6 +9,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.provider.MediaStore
 import android.provider.Settings
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -46,6 +48,9 @@ import com.example.easy_image.R
 import com.example.easy_image.utils.SaveImageToCacheAndShare
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
+import java.io.OutputStream
+import java.text.SimpleDateFormat
+
 
 @Composable
 fun DetailScreen(imageUrl: String, popBackStack: () -> Unit) {
@@ -156,7 +161,31 @@ fun DetailScreen(imageUrl: String, popBackStack: () -> Unit) {
                                 null
                             )
 
+                            return@clickable
                         }
+
+                        //val imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                        val contentValues = ContentValues()
+                        contentValues.apply {
+
+
+                           // val imageName = getFileName(System.currentTimeMillis())
+                            put(MediaStore.Images.Media.DISPLAY_NAME, "image-${imageName}.jpg")
+                            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+                        }
+
+                        val uri: Uri? = context.contentResolver.insert(
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues
+                        )
+                        val outputStream: OutputStream? = uri?.let {
+                            context.contentResolver.openOutputStream(it)
+                        }
+
+                        if (outputStream != null && bitmap != null) {
+                            bitmap?.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+                        }
+
+                        outputStream?.close()
                     }
                 }
                 .padding(12.dp)
