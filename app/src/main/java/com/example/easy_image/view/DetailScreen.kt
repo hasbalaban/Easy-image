@@ -167,6 +167,8 @@ fun DetailScreen(imageUrl: String, popBackStack: () -> Unit) {
                         //val imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
                         val contentValues = ContentValues()
                         contentValues.apply {
+                            val simpleDateFormat = SimpleDateFormat("MM-dd-HH-mm-ss")
+                            val imageName = simpleDateFormat.format(System.currentTimeMillis())
 
 
                            // val imageName = getFileName(System.currentTimeMillis())
