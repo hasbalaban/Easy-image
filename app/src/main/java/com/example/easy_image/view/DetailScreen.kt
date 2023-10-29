@@ -1,7 +1,14 @@
 package com.example.easy_image.view
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.Settings
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -28,12 +35,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startActivity
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.request.SuccessResult
-import com.example.easy_image.utils.SaveImageToCacheAndShare
+import com.example.easy_image.BuildConfig
 import com.example.easy_image.R
+import com.example.easy_image.utils.SaveImageToCacheAndShare
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
 
@@ -93,7 +103,7 @@ fun DetailScreen(imageUrl: String, popBackStack: () -> Unit) {
         }
 
     ) {
-        val (shareButton, backButton) = createRefs()
+        val (shareButton, backButton, saveButton) = createRefs()
 
         AsyncImage(
             modifier = Modifier
@@ -123,6 +133,39 @@ fun DetailScreen(imageUrl: String, popBackStack: () -> Unit) {
         )
         Image(
             modifier = Modifier
+                .constrainAs(saveButton) {
+                    top.linkTo(parent.top)
+                    end.linkTo(shareButton.start)
+                }
+                .clickable {
+
+
+                    val permissionCheck = ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    )
+                    if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+                        println("sdsd")
+                    } else {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
+                            val uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID)
+
+                            startActivity(
+                                context,
+                                Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri),
+                                null
+                            )
+
+                        }
+                    }
+                }
+                .padding(12.dp)
+                .size(24.dp),
+            painter = painterResource(id = R.drawable.share_icon),
+            contentDescription = "save Button"
+        )
+        Image(
+            modifier = Modifier
                 .constrainAs(shareButton) {
                     top.linkTo(parent.top)
                     end.linkTo(parent.end)
@@ -133,7 +176,7 @@ fun DetailScreen(imageUrl: String, popBackStack: () -> Unit) {
                     }
                 }.padding(12.dp).size(24.dp),
             painter = painterResource(id = R.drawable.share_icon),
-            contentDescription = "save Button"
+            contentDescription = "Share Button"
         )
 
     }
