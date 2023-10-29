@@ -14,7 +14,11 @@ android {
         minSdk 24
         targetSdk 34
         versionCode 1
-        versionName "1.0"
+        versionName "1"
+
+        buildConfigField "String", "APPLICATION_ID", "\"$applicationId\""
+        buildConfigField "String", "VERSION_CODE", "\"$versionCode\""
+        buildConfigField "String", "VERSION_NAME", "\"$versionName\""
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -75,7 +79,7 @@ dependencies {
     implementation 'androidx.camera:camera-view:1.1.0-beta02'
     implementation 'androidx.compose.foundation:foundation'
     implementation 'androidx.activity:activity-ktx:1.4.0'
-
+    implementation 'androidx.core:core-ktx:+'
 
 
     testImplementation 'junit:junit:4.13.2'
