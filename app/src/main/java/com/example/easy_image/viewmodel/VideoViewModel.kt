@@ -3,11 +3,8 @@ package com.example.easy_image.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.easy_image.model.Hits
-import com.example.easy_image.model.ImageResponse
 import com.example.easy_image.model.VideoItem
 import com.example.easy_image.model.VideoResponse
-import com.example.easy_image.service.ImageService
 import com.example.easy_image.service.VideoService
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
@@ -65,5 +62,17 @@ class VideoViewModel : MainViewModel() {
         }catch (e : Exception){
             println(e.cause)
         }
+    }
+
+    fun videoMusicStatusChanged(videoId : Int){
+        _videos.value?.hits?.let {
+            for (i in it)
+                if (i.id == videoId) {
+                    i.isMusicOpen = i.isMusicOpen.not()
+                    _videos.value = _videos.value
+                    break
+                }
+        }
+
     }
 }

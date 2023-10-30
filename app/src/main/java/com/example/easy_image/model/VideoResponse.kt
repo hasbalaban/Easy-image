@@ -21,7 +21,9 @@ data class VideoItem(
     val user_id: Int?,
     val user: String?,
     val userImageURL: String?
-)
+){
+    var isMusicOpen : Boolean = false
+}
 
 data class VideoUrls(
     val large: VideoSize?,
