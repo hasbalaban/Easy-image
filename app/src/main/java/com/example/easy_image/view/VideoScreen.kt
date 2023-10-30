@@ -64,14 +64,17 @@ fun VideoScreen(
                         val mExoPlayer = remember(mContext) {
                             ExoPlayer.Builder(mContext).build().apply {
                                 prepare(source)
+                                play()
+                                repeatMode = REPEAT_MODE_ONE
                             }
                         }
                         AndroidView(modifier = Modifier.fillMaxWidth().height(160.dp), factory = { context ->
 
                             PlayerView(context).apply {
                                 player = mExoPlayer
-                                controllerShowTimeoutMs = 2000
-                                mExoPlayer.volume = 1f
+                                controllerShowTimeoutMs = 1000
+                                defaultArtwork = resources.getDrawable(R.drawable.ic_home)
+                                useController = false
                             }
                         })
                     }
