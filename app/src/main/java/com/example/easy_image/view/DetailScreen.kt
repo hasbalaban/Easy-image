@@ -120,7 +120,7 @@ fun DetailScreen(imageUrl: String, popBackStack: () -> Unit) {
                     translationY = offsetY
                 ),
             model = imageRequest,
-            contentScale = ContentScale.FillWidth,
+            contentScale = ContentScale.FillBounds,
             contentDescription = null
         )
 
