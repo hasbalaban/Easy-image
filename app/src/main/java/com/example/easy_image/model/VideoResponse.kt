@@ -3,11 +3,11 @@ package com.example.easy_image.model
 data class VideoResponse(
     val total: Int?,
     val totalHits: Int?,
-    var hits: List<VideoItem>?
+    val hits: List<VideoItem>?
 )
 
 data class VideoItem(
-    val id: Int?,
+    val id: Int,
     val pageURL: String?,
     val type: String?,
     val tags: String?,
@@ -21,9 +21,7 @@ data class VideoItem(
     val user_id: Int?,
     val user: String?,
     val userImageURL: String?
-){
-    var isMusicOpen : Boolean = false
-}
+)
 
 data class VideoUrls(
     val large: VideoSize?,
@@ -37,4 +35,10 @@ data class VideoSize(
     val width: Int?,
     val height: Int?,
     val size: Int?
+)
+
+data class VideoItemDTO(
+    val id : Int,
+    val videoUrl : String,
+    val isMusicOpen : Boolean = false
 )
