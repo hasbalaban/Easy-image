@@ -51,6 +51,10 @@ fun VideoScreen(
 
     val videos = viewModel.videos.observeAsState()
 
+    if (videos.value == null){
+        println("")
+    }
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center
@@ -74,9 +78,6 @@ fun VideoScreen(
                         val mExoPlayer = remember(mContext) {
                             ExoPlayer.Builder(mContext).build().apply {
                                 prepare(source)
-                                play()
-
-                                isDeviceMuted = true
                                 repeatMode = REPEAT_MODE_ONE
                             }
                         }
@@ -90,12 +91,14 @@ fun VideoScreen(
                                 .height(240.dp), factory = { context ->
                             PlayerView(context).apply {
                                 player = mExoPlayer.apply {
-                                    val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
-                                    val volume = if (it.isMusicOpen) 100 else 0
-                                    audioManager?.setStreamVolume(
-                                        AudioManager.STREAM_MUSIC,
-                                        volume, 0
-                                    )
+                                 //   val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
+                                //    val volume = if (it.isMusicOpen) 100 else 0
+                               //    audioManager?.setStreamVolume(
+                              //          AudioManager.STREAM_MUSIC,
+                             //          volume, 0
+                            //       )
+
+                                    if (it.isMusicOpen) play() else stop()
                                 }
                                 controllerShowTimeoutMs = 1000
                                 defaultArtwork = resources.getDrawable(R.drawable.ic_home)

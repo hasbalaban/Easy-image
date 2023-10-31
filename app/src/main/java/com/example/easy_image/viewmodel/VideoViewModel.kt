@@ -65,14 +65,18 @@ class VideoViewModel : MainViewModel() {
     }
 
     fun videoMusicStatusChanged(videoId : Int){
-        _videos.value?.hits?.let {
-            for (i in it)
-                if (i.id == videoId) {
-                    i.isMusicOpen = i.isMusicOpen.not()
-                    _videos.value = _videos.value
-                    break
-                }
+        val items = _videos.value?.hits?.map {
+            if (it.id == videoId) {
+                it.isMusicOpen = it.isMusicOpen.not()
+            }
+            it
         }
+        val newResponse = VideoResponse(
+            _videos.value?.total,
+            _videos.value?.total,
+            items
+        )
+        _videos.value = newResponse
 
     }
 }

@@ -3,7 +3,7 @@ package com.example.easy_image.model
 data class VideoResponse(
     val total: Int?,
     val totalHits: Int?,
-    val hits: List<VideoItem>?
+    var hits: List<VideoItem>?
 )
 
 data class VideoItem(
