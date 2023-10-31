@@ -12,8 +12,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class VideoViewModel : MainViewModel() {
 
-    private val _videos = MutableLiveData<VideoResponse?>()
-    val videos : LiveData<VideoResponse?> get() = _videos
+    private val _videos = MutableLiveData<List<VideoItemDTO>?>()
+    val videos : LiveData<List<VideoItemDTO>?> get() = _videos
     private var currentImageRequestPage = 1
 
     fun getVideos(
@@ -44,20 +44,16 @@ class VideoViewModel : MainViewModel() {
                     query = "river",
                     page = currentImageRequestPage
                 )
-                videos?.let {
-                    val images: List<VideoItem>? = it.hits?.let { newList ->
-
-                        println(newList)
-
-                        (_videos.value?.hits ?: mutableListOf()).plus(newList)
-                    }
-
-
-                    _videos.value = it.copy(
-                        hits = images
+                val videoList = videos?.hits?.map {
+                    VideoItemDTO(
+                        it.id,
+                        it.videos?.large?.url ?: "",
+                        false
                     )
-                    currentImageRequestPage += 1
                 }
+
+                _videos.value = videoList?.plus(_videos.value ?: listOf())
+                currentImageRequestPage += 1
             }
         }catch (e : Exception){
             println(e.cause)
@@ -65,18 +61,21 @@ class VideoViewModel : MainViewModel() {
     }
 
     fun videoMusicStatusChanged(videoId : Int){
-        val items = _videos.value?.hits?.map {
+
+
+        val newVideoList = _videos.value?.map {
+            var isMusicOpen = it.isMusicOpen
             if (it.id == videoId) {
-                it.isMusicOpen = it.isMusicOpen.not()
+                isMusicOpen= it.isMusicOpen.not()
             }
-            it
+            VideoItemDTO(
+                it.id.ignoreNull(),
+                it.videoUrl,
+                isMusicOpen,
+            )
         }
-        val newResponse = VideoResponse(
-            _videos.value?.total,
-            _videos.value?.total,
-            items
-        )
-        _videos.value = newResponse
+        _videos.value = null
+        _videos.value = newVideoList
 
     }
 }
