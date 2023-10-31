@@ -3,9 +3,9 @@ package com.example.easy_image.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.easy_image.model.VideoItem
-import com.example.easy_image.model.VideoResponse
+import com.example.easy_image.model.VideoItemDTO
 import com.example.easy_image.service.VideoService
+import com.example.easy_image.utils.ignoreNull
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

@@ -1,7 +1,5 @@
 package com.example.easy_image.view
 
-import android.content.Context
-import android.media.AudioManager
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -16,9 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,7 +22,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.navigation.NavController
 import com.example.easy_image.R
 import com.example.easy_image.viewmodel.VideoViewModel
@@ -65,14 +60,18 @@ fun VideoScreen(
         )
 
 
-        videos.value?.hits?.let {
+        videos.value?.let {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(it) {
+                items(it,
+                key = {
+                    it.id
+                }
+                    ) {
                     Column(modifier = Modifier
                         .padding(top = 24.dp)
                         .fillMaxWidth()) {
 
-                        val videoURL =it.videos?.medium?.url
+                        val videoURL =it.videoUrl
                         val source = ProgressiveMediaSource.Factory(dataSourceFactory)
                             .createMediaSource(Uri.parse(videoURL))
                         val mExoPlayer = remember(mContext) {
