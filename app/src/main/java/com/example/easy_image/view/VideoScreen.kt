@@ -105,10 +105,10 @@ fun VideoScreen(
                             }
                             })
 
-                            val imageIcon by remember { mutableStateOf(if (it.isMusicOpen) R.drawable.music_on else R.drawable.music_off) }
+                            val imageIcon = if (it.isMusicOpen) R.drawable.music_on else R.drawable.music_off
                             Image(
                                 modifier = Modifier.clickable {
-                                    it.id?.let { it1 -> viewModel.videoMusicStatusChanged(it1) }
+                                    viewModel.videoMusicStatusChanged(it.id)
                                 }.padding(12.dp),
                                 painter = painterResource(id = imageIcon), contentDescription = "sound status" )
 
