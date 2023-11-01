@@ -1,6 +1,7 @@
 package com.example.easy_image.view
 
 import android.net.Uri
+import android.os.Looper
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -26,7 +27,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.Player.REPEAT_MODE_ONE
+import androidx.media3.common.Player.RepeatMode
+import androidx.media3.datasource.HttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import androidx.navigation.NavController
@@ -110,6 +115,7 @@ fun VideoItemScreen(videoItemDTO: VideoItemDTO) {
         mutableStateOf(
             ExoPlayer.Builder(context).build().apply {
                 setMediaItem(mediaItem)
+                repeatMode = REPEAT_MODE_ONE
             }
         )
     }
@@ -119,7 +125,35 @@ fun VideoItemScreen(videoItemDTO: VideoItemDTO) {
             super.onVolumeChanged(volume)
             Toast.makeText(context, "onVolumeChanged", Toast.LENGTH_SHORT).show()
         }
+        override fun onIsPlayingChanged(isPlaying: Boolean) {
+            if (isPlaying) {
+                // Active playback.
+            } else {
+                // Not playing because playback is paused, ended, suppressed, or the player
+                // is buffering, stopped or failed. Check player.playWhenReady,
+                // player.playbackState, player.playbackSuppressionReason and
+                // player.playerError for details.
+            }
+        }
+
+        override fun onPlayerError(error: PlaybackException) {
+            val cause = error.cause
+            if (cause is HttpDataSource.HttpDataSourceException) {
+                // An HTTP error occurred.
+                val httpError = cause
+                // It's possible to find out more about the error both by casting and by querying
+                // the cause.
+                if (httpError is HttpDataSource.InvalidResponseCodeException) {
+                    // Cast to InvalidResponseCodeException and retrieve the response code, message
+                    // and headers.
+                } else {
+                    // Try calling httpError.getCause() to retrieve the underlying cause, although
+                    // note that it may be null.
+                }
+            }
+        }
     })
+
 
 
 
