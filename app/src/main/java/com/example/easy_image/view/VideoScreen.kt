@@ -146,7 +146,7 @@ fun VideoItemScreen(videoItemDTO: VideoItemDTO) {
                 }
             }
             controllerShowTimeoutMs = 1000
-           // useController = false
+            useController = false
         }
     })
 }
