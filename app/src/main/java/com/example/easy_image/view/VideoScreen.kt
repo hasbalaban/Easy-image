@@ -96,6 +96,7 @@ fun VideoScreen(
         }
     }
 }
+@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 @Composable
 fun VideoItemScreen(videoItemDTO: VideoItemDTO) {
     val context = LocalContext.current
@@ -103,15 +104,18 @@ fun VideoItemScreen(videoItemDTO: VideoItemDTO) {
     val exoPlayer by remember {
         mutableStateOf(
             ExoPlayer.Builder(context).build()
-
         )
     }
 
     val mediaItem = MediaItem.fromUri(Uri.parse(videoItemDTO.videoUrl))
     exoPlayer.setMediaItem(mediaItem)
 
-    exoPlayer.prepare()
-    exoPlayer.play()
+    if (videoItemDTO.isMusicOpen){
+        exoPlayer.prepare()
+        exoPlayer.play()
+    }else {
+        exoPlayer.stop()
+    }
 
 
     AndroidView(modifier = Modifier
@@ -119,9 +123,14 @@ fun VideoItemScreen(videoItemDTO: VideoItemDTO) {
         .height(240.dp), factory = { _ ->
         PlayerView(context).apply {
             player = exoPlayer.apply {
-                if (videoItemDTO.isMusicOpen) play() else stop()
+                if (videoItemDTO.isMusicOpen) {
+                    prepare()
+                    play()
+                } else {
+                    stop()
+                }
             }
-            //controllerShowTimeoutMs = 1
+            controllerShowTimeoutMs = 1000
            // useController = false
         }
     })
