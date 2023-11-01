@@ -14,7 +14,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,15 +24,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 import androidx.navigation.NavController
 import com.example.easy_image.R
+import com.example.easy_image.model.VideoItemDTO
 import com.example.easy_image.viewmodel.VideoViewModel
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.Player.REPEAT_MODE_ONE
-import com.google.android.exoplayer2.source.ProgressiveMediaSource
-import com.google.android.exoplayer2.ui.PlayerView
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
-import com.google.android.exoplayer2.util.Util
 
 
 @Composable
@@ -38,7 +38,6 @@ fun VideoScreen(
     navController: NavController,
     viewModel: VideoViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
-    val mContext = LocalContext.current
 
     LaunchedEffect(Unit) {
         viewModel.getVideos()
@@ -50,66 +49,43 @@ fun VideoScreen(
         println("")
     }
 
+
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center
     ) {
-        val dataSourceFactory = DefaultDataSourceFactory(
-            mContext,
-            Util.getUserAgent(mContext, mContext.packageName)
-        )
 
 
         videos.value?.let {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(it,
-                key = {
-                    it.id
-                }
-                    ) {
+                    key = {
+                        it.id
+                    }
+                ) {
+                    val videoURL =it.videoUrl
+
+
+                    val isMusicOpen = it.isMusicOpen
+
                     Column(modifier = Modifier
                         .padding(top = 24.dp)
                         .fillMaxWidth()) {
-
-                        val videoURL =it.videoUrl
-                        val source = ProgressiveMediaSource.Factory(dataSourceFactory)
-                            .createMediaSource(Uri.parse(videoURL))
-                        val mExoPlayer = remember(mContext) {
-                            ExoPlayer.Builder(mContext).build().apply {
-                                prepare(source)
-                                repeatMode = REPEAT_MODE_ONE
-                            }
-                        }
                         Box(modifier = Modifier
                             .fillMaxSize()
                             .height(240.dp),
                             contentAlignment = Alignment.TopEnd
                         ) {
-                            AndroidView(modifier = Modifier
-                                .fillMaxWidth()
-                                .height(240.dp), factory = { context ->
-                            PlayerView(context).apply {
-                                player = mExoPlayer.apply {
-                                 //   val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager?
-                                //    val volume = if (it.isMusicOpen) 100 else 0
-                               //    audioManager?.setStreamVolume(
-                              //          AudioManager.STREAM_MUSIC,
-                             //          volume, 0
-                            //       )
-
-                                    if (it.isMusicOpen) play() else stop()
-                                }
-                                controllerShowTimeoutMs = 1000
-                                defaultArtwork = resources.getDrawable(R.drawable.ic_home)
-                                useController = false
-                            }
-                            })
+                            VideoItemScreen(it)
 
                             val imageIcon = if (it.isMusicOpen) R.drawable.music_on else R.drawable.music_off
                             Image(
-                                modifier = Modifier.clickable {
-                                    viewModel.videoMusicStatusChanged(it.id)
-                                }.padding(12.dp),
+                                modifier = Modifier
+                                    .clickable {
+                                        viewModel.videoMusicStatusChanged(it.id)
+                                    }
+                                    .padding(12.dp),
                                 painter = painterResource(id = imageIcon), contentDescription = "sound status" )
 
                         }
@@ -118,7 +94,36 @@ fun VideoScreen(
                 }
             }
         }
-
-
     }
 }
+@Composable
+fun VideoItemScreen(videoItemDTO: VideoItemDTO) {
+    val context = LocalContext.current
+
+    val exoPlayer by remember {
+        mutableStateOf(
+            ExoPlayer.Builder(context).build()
+
+        )
+    }
+
+    val mediaItem = MediaItem.fromUri(Uri.parse(videoItemDTO.videoUrl))
+    exoPlayer.setMediaItem(mediaItem)
+
+    exoPlayer.prepare()
+    exoPlayer.play()
+
+
+    AndroidView(modifier = Modifier
+        .fillMaxWidth()
+        .height(240.dp), factory = { _ ->
+        PlayerView(context).apply {
+            player = exoPlayer.apply {
+                if (videoItemDTO.isMusicOpen) play() else stop()
+            }
+            //controllerShowTimeoutMs = 1
+           // useController = false
+        }
+    })
+}
+
