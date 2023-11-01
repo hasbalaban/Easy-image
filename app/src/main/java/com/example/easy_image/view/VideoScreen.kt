@@ -1,6 +1,7 @@
 package com.example.easy_image.view
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import androidx.navigation.NavController
@@ -56,6 +58,7 @@ fun VideoScreen(
         verticalArrangement = Arrangement.Center
     ) {
 
+        val context = LocalContext.current
 
         videos.value?.let {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -83,6 +86,7 @@ fun VideoScreen(
                             Image(
                                 modifier = Modifier
                                     .clickable {
+
                                         viewModel.videoMusicStatusChanged(it.id)
                                     }
                                     .padding(12.dp),
@@ -102,19 +106,30 @@ fun VideoItemScreen(videoItemDTO: VideoItemDTO) {
     val context = LocalContext.current
 
     val exoPlayer by remember {
+        val mediaItem = MediaItem.fromUri(Uri.parse(videoItemDTO.videoUrl))
         mutableStateOf(
-            ExoPlayer.Builder(context).build()
+            ExoPlayer.Builder(context).build().apply {
+                setMediaItem(mediaItem)
+            }
         )
     }
 
-    val mediaItem = MediaItem.fromUri(Uri.parse(videoItemDTO.videoUrl))
-    exoPlayer.setMediaItem(mediaItem)
+    exoPlayer.addListener(object : Player.Listener{
+        override fun onVolumeChanged(volume: Float) {
+            super.onVolumeChanged(volume)
+            Toast.makeText(context, "onVolumeChanged", Toast.LENGTH_SHORT).show()
+        }
+    })
+
+
+
 
     if (videoItemDTO.isMusicOpen){
         exoPlayer.prepare()
         exoPlayer.play()
     }else {
         exoPlayer.stop()
+
     }
 
 
