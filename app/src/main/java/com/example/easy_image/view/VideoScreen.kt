@@ -116,6 +116,7 @@ fun VideoItemScreen(videoItemDTO: VideoItemDTO) {
             ExoPlayer.Builder(context).build().apply {
                 setMediaItem(mediaItem)
                 repeatMode = REPEAT_MODE_ONE
+                this.volume = 1f
             }
         )
     }
