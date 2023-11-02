@@ -64,10 +64,12 @@ class VideoViewModel : MainViewModel() {
 
 
         val newVideoList = _videos.value?.map {
-            var isMusicOpen = it.isMusicOpen
-            if (it.id == videoId) {
-                isMusicOpen= it.isMusicOpen.not()
-            }
+            val isMusicOpen: Boolean =
+                if (it.id == videoId)
+                    it.isMusicOpen.not()
+                else
+                    false
+
             VideoItemDTO(
                 it.id.ignoreNull(),
                 it.videoUrl,

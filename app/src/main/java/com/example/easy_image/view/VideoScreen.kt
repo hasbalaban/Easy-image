@@ -71,8 +71,9 @@ fun VideoScreen(
                     }
                 ) {
 
-                    Column(modifier = Modifier
-                        .padding(top = 24.dp)
+                    Column(modifier = Modifier.clickable {
+                        viewModel.videoMusicStatusChanged(it.id)
+                    }.padding(top = 24.dp)
                         .fillMaxWidth()) {
                         Box(modifier = Modifier
                             .fillMaxSize()
@@ -85,7 +86,6 @@ fun VideoScreen(
                             Image(
                                 modifier = Modifier
                                     .clickable {
-
                                         viewModel.videoMusicStatusChanged(it.id)
                                     }
                                     .padding(12.dp),
