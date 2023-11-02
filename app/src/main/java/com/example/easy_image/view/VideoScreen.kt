@@ -70,10 +70,6 @@ fun VideoScreen(
                         it.id
                     }
                 ) {
-                    val videoURL =it.videoUrl
-
-
-                    val isMusicOpen = it.isMusicOpen
 
                     Column(modifier = Modifier
                         .padding(top = 24.dp)
