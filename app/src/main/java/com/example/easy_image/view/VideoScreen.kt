@@ -1,6 +1,8 @@
 package com.example.easy_image.view
 
 import android.net.Uri
+import android.view.SurfaceHolder
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -31,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.common.Player.REPEAT_MODE_ONE
 import androidx.media3.ui.PlayerView
 import androidx.media3.ui.PlayerView.SHOW_BUFFERING_ALWAYS
@@ -142,15 +146,13 @@ fun VideoItemScreen(videoItemDTO: VideoItemDTO) {
     }
 
 
+
     DisposableEffect(key1 = true) {
         onDispose {
             playerView.player = null
             ExoPlayerManager.releasePlayer(exoPlayer = exoPlayer, videoItemDTO)
         }
     }
-
-
-
 
 
     if (videoItemDTO.isMusicOpen){
@@ -168,5 +170,10 @@ fun VideoItemScreen(videoItemDTO: VideoItemDTO) {
         .fillMaxWidth()
         .height(240.dp), factory = { playerView }
     )
+    if (videoItemDTO.isMusicOpen.not()){
+        Image(
+            modifier = Modifier.fillMaxWidth().height(240.dp).padding(100.dp),
+            painter = painterResource(id = R.drawable.ic_video), contentDescription = null)
+    }
 }
 
