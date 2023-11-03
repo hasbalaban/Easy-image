@@ -76,7 +76,7 @@ object CacheManager {
     fun initialize(context: Context) {
         if (!::cache.isInitialized) {
             val cacheDirectory = File(context.cacheDir, "ExoplayerCache")
-            val maxCacheSize = 200 * 1024 * 1024 // 100 MB cache size
+            val maxCacheSize = 100 * 1024 * 1024 // 100 MB cache size
             val evictor = LeastRecentlyUsedCacheEvictor(maxCacheSize.toLong())
             val databaseProvider: DatabaseProvider = StandaloneDatabaseProvider(context)
             cache = SimpleCache(cacheDirectory, evictor, databaseProvider)
