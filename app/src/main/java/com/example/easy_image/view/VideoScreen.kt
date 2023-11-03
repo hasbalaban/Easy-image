@@ -4,6 +4,7 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,9 +13,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -25,16 +29,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
-import androidx.media3.common.PlaybackException
-import androidx.media3.common.Player
 import androidx.media3.common.Player.REPEAT_MODE_ONE
-import androidx.media3.datasource.HttpDataSource
-import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import androidx.media3.ui.PlayerView.SHOW_BUFFERING_ALWAYS
 import androidx.navigation.NavController
 import com.example.easy_image.R
 import com.example.easy_image.model.VideoItemDTO
+import com.example.easy_image.utils.ExoPlayerManager
 import com.example.easy_image.viewmodel.VideoViewModel
 
 
@@ -43,6 +46,15 @@ fun VideoScreen(
     navController: NavController,
     viewModel: VideoViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
+
+    val scrollState = remember { LazyListState() }
+    val playedVideo = remember {
+        derivedStateOf {
+            ((scrollState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+                ?: 0) + (scrollState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0)) / 2
+        }
+    }
+
 
     LaunchedEffect(Unit) {
         viewModel.getVideos()
@@ -71,9 +83,11 @@ fun VideoScreen(
                     }
                 ) {
 
-                    Column(modifier = Modifier.clickable {
-                        viewModel.videoMusicStatusChanged(it.id)
-                    }.padding(top = 24.dp)
+                    Column(modifier = Modifier
+                        .clickable {
+                            viewModel.videoMusicStatusChanged(it.id)
+                        }
+                        .padding(top = 24.dp)
                         .fillMaxWidth()) {
                         Box(modifier = Modifier
                             .fillMaxSize()
@@ -104,62 +118,55 @@ fun VideoScreen(
 fun VideoItemScreen(videoItemDTO: VideoItemDTO) {
     val context = LocalContext.current
 
+
+
     val exoPlayer by remember {
-        val mediaItem = MediaItem.fromUri(Uri.parse(videoItemDTO.videoUrl))
         mutableStateOf(
-            ExoPlayer.Builder(context).build().apply {
-                setMediaItem(mediaItem)
-                repeatMode = REPEAT_MODE_ONE
-                this.volume = 1f
+            ExoPlayerManager.initializePlayer(context).apply {
+                volume = if (videoItemDTO.isMusicOpen) 1f else 0f
+                setHandleAudioBecomingNoisy(true)
+                videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT
+
             }
         )
     }
 
-    exoPlayer.addListener(object : Player.Listener{
-        override fun onVolumeChanged(volume: Float) {
-            super.onVolumeChanged(volume)
-        }
-        override fun onIsPlayingChanged(isPlaying: Boolean) {
-            if (isPlaying) { }else { }
-        }
-
-        override fun onPlayerError(error: PlaybackException) {
-            val cause = error.cause
-            if (cause is HttpDataSource.HttpDataSourceException) {
-
-                if (cause is HttpDataSource.InvalidResponseCodeException) { } else { }
+    val playerView = remember {
+        PlayerView(context).apply {
+            player = exoPlayer.apply {
+                setShowBuffering(SHOW_BUFFERING_ALWAYS)
             }
+            controllerShowTimeoutMs = 10
+            useController = false
         }
-    })
+    }
+
+
+    DisposableEffect(key1 = true) {
+        onDispose {
+            playerView.player = null
+            ExoPlayerManager.releasePlayer(exoPlayer = exoPlayer, videoItemDTO)
+        }
+    }
 
 
 
 
 
     if (videoItemDTO.isMusicOpen){
-        exoPlayer.prepare()
-        exoPlayer.play()
+        ExoPlayerManager.setMediaItem(
+            exoPlayer = exoPlayer,
+            videoUri = videoItemDTO.videoUrl,
+            playbackPosition = videoItemDTO.playbackPosition
+        )
     }else {
         exoPlayer.stop()
-
     }
 
 
     AndroidView(modifier = Modifier
         .fillMaxWidth()
-        .height(240.dp), factory = { _ ->
-        PlayerView(context).apply {
-            player = exoPlayer.apply {
-                if (videoItemDTO.isMusicOpen) {
-                    prepare()
-                    play()
-                } else {
-                    stop()
-                }
-            }
-            controllerShowTimeoutMs = 1000
-            useController = false
-        }
-    })
+        .height(240.dp), factory = { playerView }
+    )
 }
 
