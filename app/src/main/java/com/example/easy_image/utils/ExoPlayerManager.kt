@@ -69,6 +69,24 @@ object ExoPlayerManager {
     }
 }
 
+object CacheManager {
+    private lateinit var cache: SimpleCache
+
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+    fun initialize(context: Context) {
+        if (!::cache.isInitialized) {
+            val cacheDirectory = File(context.cacheDir, "ExoplayerCache")
+            val maxCacheSize = 200 * 1024 * 1024 // 100 MB cache size
+            val evictor = LeastRecentlyUsedCacheEvictor(maxCacheSize.toLong())
+            val databaseProvider: DatabaseProvider = StandaloneDatabaseProvider(context)
+            cache = SimpleCache(cacheDirectory, evictor, databaseProvider)
+        }
+    }
+
+    fun getCache(): SimpleCache {
+        return cache
+    }
+}
 
 
 
