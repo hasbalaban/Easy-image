@@ -1,19 +1,15 @@
 package com.example.easy_image.utils
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.VisibilityThreshold
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.IntOffset
 
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun EnterAnimation(content: @Composable () -> Unit) {
     AnimatedVisibility(
@@ -21,13 +17,9 @@ fun EnterAnimation(content: @Composable () -> Unit) {
             initialState = false
         ).apply { targetState = true },
         modifier = Modifier,
-        enter = slideInHorizontally(
-            animationSpec = spring(
-                stiffness = Spring.DampingRatioLowBouncy,
-                visibilityThreshold = IntOffset.VisibilityThreshold
-            )
-        ) + slideInVertically(),
-        exit = slideOutHorizontally() + shrinkVertically() ,
+        enter = scaleIn(),
+        exit = scaleOut(
+        ),
     ) {
         content()
     }
