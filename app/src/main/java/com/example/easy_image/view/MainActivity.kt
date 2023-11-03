@@ -41,6 +41,7 @@ import com.example.easy_image.utils.NavigationDirections
 import com.example.easy_image.R
 import com.example.easy_image.model.FavoriteDTO
 import com.example.easy_image.ui.theme.SaveWhattsappMediaTheme
+import com.example.easy_image.utils.EnterAnimation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlin.system.measureTimeMillis
@@ -61,27 +62,19 @@ class MainActivity : ComponentActivity() {
 
             val navController = rememberNavController()
             SaveWhattsappMediaTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
+
+                Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-
-                    Scaffold(
-                        bottomBar = {
-                            val navBackStackEntry by navController.currentBackStackEntryAsState()
-                            val currentRoute = navBackStackEntry?.destination?.route
-                            if (currentRoute != NavigationDirections.DetailScreen.route) {
-                                BottomBar(navController)
-                            }
+                    bottomBar = {
+                        val navBackStackEntry by navController.currentBackStackEntryAsState()
+                        val currentRoute = navBackStackEntry?.destination?.route
+                        if (currentRoute != NavigationDirections.DetailScreen.route) {
+                            BottomBar(navController)
                         }
-                    ) {it ->
-
-                        MainNavHost(it, navController)
                     }
+                ) {it ->
 
-
-
+                    MainNavHost(it, navController)
                 }
             }
         }
@@ -99,11 +92,14 @@ class MainActivity : ComponentActivity() {
 
 
             composable(NavigationDirections.HomeScreen.route) {
+
                 //val viewModel = hiltViewModel<TestViewModel>()
                 val coroutines : CoroutineScope = rememberCoroutineScope()
                 val openImageDetail = { imageUrl : String ->
                     navController.navigate(NavigationDirections.DetailScreen.createRoute(imageUrl = imageUrl))
                 }
+
+                EnterAnimation(content = {
 
                 HomeScreen(openImageDetail, coroutines = coroutines, favoriteImages = favoriteImages, addOrRemoveFromFavoriteList = {favorite ->
                     if (favoriteImages.any {
@@ -121,6 +117,8 @@ class MainActivity : ComponentActivity() {
                         true
                     }
                 })
+                }
+                )
 
 
                 val lifeCycleOwner = LocalLifecycleOwner.current
@@ -143,18 +141,27 @@ class MainActivity : ComponentActivity() {
                 val openImageDetail = { imageUrl : String ->
                     navController.navigate(NavigationDirections.DetailScreen.createRoute(imageUrl = imageUrl))
                 }
+                EnterAnimation(content = {
+                    FavoriteScreen(navController, openImageDetail, favoriteImages = favoriteImages){
+                        favoriteImages.remove(it)
+                    }
+                })
 
-                FavoriteScreen(navController, openImageDetail, favoriteImages = favoriteImages){
-                    favoriteImages.remove(it)
-                }
             }
 
+
+
             composable(NavigationDirections.Video.route) {
-                VideoScreen(navController = navController)
+
+                EnterAnimation(content = {
+                    VideoScreen(navController = navController)
+                })
             }
 
             composable(NavigationDirections.SearchScreen.route) {
+                EnterAnimation(content = {
 
+                })
             }
 
 
@@ -183,7 +190,10 @@ class MainActivity : ComponentActivity() {
                     onDispose { lifeCycleOwner.lifecycle.removeObserver(observer) }
                 }
 
-                DetailScreen(imageUrl, popBackStack)
+                EnterAnimation(content = {
+                    DetailScreen(imageUrl, popBackStack)
+                })
+
 
             }
         }
