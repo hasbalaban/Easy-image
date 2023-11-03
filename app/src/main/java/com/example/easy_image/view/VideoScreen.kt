@@ -128,21 +128,9 @@ fun VideoItemScreen(videoItemDTO: VideoItemDTO) {
         )
     }
 
-    val playerView = remember {
-        PlayerView(context).apply {
-            player = exoPlayer.apply {
-                setShowBuffering(SHOW_BUFFERING_ALWAYS)
-            }
-            controllerShowTimeoutMs = 10
-            useController = false
-        }
-    }
-
-
 
     DisposableEffect(key1 = true) {
         onDispose {
-            playerView.player = null
             ExoPlayerManager.releasePlayer(exoPlayer = exoPlayer, videoItemDTO)
         }
     }
@@ -161,7 +149,13 @@ fun VideoItemScreen(videoItemDTO: VideoItemDTO) {
 
     AndroidView(modifier = Modifier
         .fillMaxWidth()
-        .height(240.dp), factory = { playerView }
+        .height(240.dp), factory = { PlayerView(context).apply {
+        player = exoPlayer.apply {
+            setShowBuffering(SHOW_BUFFERING_ALWAYS)
+        }
+        controllerShowTimeoutMs = 10
+        useController = false
+    } }
     )
     if (videoItemDTO.isMusicOpen.not()){
         Image(
