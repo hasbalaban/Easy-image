@@ -1,12 +1,7 @@
 package com.example.easy_image.view
 
-import android.net.Uri
-import android.view.SurfaceHolder
-import android.widget.ImageView
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -33,9 +27,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.C
-import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
-import androidx.media3.common.Player.REPEAT_MODE_ONE
 import androidx.media3.ui.PlayerView
 import androidx.media3.ui.PlayerView.SHOW_BUFFERING_ALWAYS
 import androidx.navigation.NavController
@@ -77,8 +68,10 @@ fun VideoScreen(
         verticalArrangement = Arrangement.Center
     ) {
 
-        val context = LocalContext.current
+       // val configuration = LocalConfiguration.current
+      //  val screenHeightDp = configuration.screenHeightDp.dp
 
+      //  val context = LocalContext.current
         videos.value?.let {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(it,
@@ -91,7 +84,7 @@ fun VideoScreen(
                         .clickable {
                             viewModel.videoMusicStatusChanged(it.id)
                         }
-                        .padding(top = 24.dp)
+                        .padding(top = 20.dp)
                         .fillMaxWidth()) {
                         Box(modifier = Modifier
                             .fillMaxSize()
