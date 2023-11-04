@@ -73,7 +73,7 @@ fun VideoScreen(
                         .fillMaxWidth()) {
                         Box(modifier = Modifier
                             .fillMaxSize()
-                            .height(220.dp),
+                            .height(230.dp),
                             contentAlignment = Alignment.TopEnd
                         ) {
                             VideoItemScreen(it, openVideoDetail, viewModel)
@@ -133,7 +133,7 @@ fun VideoItemScreen(
 
         }
         .fillMaxWidth()
-        .height(220.dp), factory = {
+        .height(230.dp), factory = {
         PlayerView(context).apply {
             player = exoPlayer.apply {
                 setShowBuffering(SHOW_BUFFERING_ALWAYS)
@@ -165,8 +165,8 @@ fun VideoItemScreen(
             Image(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(220.dp)
-                    .padding(90.dp),
+                    .height(230.dp)
+                    .padding(95.dp),
                 painter = painterResource(id = R.drawable.ic_video), contentDescription = null
             )
         } else {
