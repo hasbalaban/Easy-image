@@ -44,13 +44,14 @@ class VideoViewModel : MainViewModel() {
                     query = "river",
                     page = currentImageRequestPage
                 )
-                val videoList = videos?.hits?.mapIndexed { index, videoItem ->
+                val videoList = videos?.hits?.filterIndexed { index, videoItem ->
+                    index != 0
+                }?.mapIndexed { index, videoItem ->
 
                     VideoItemDTO(
                         videoItem.id,
                         videoItem.videos?.large?.url ?: "",
                         index == 0 && _videos.value == null,
-                        index
                     )
                 }
 
@@ -76,7 +77,6 @@ class VideoViewModel : MainViewModel() {
                 it.id.ignoreNull(),
                 it.videoUrl,
                 isMusicOpen,
-                it.playbackPosition
             )
         }
         _videos.value = null
