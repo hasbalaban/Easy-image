@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,15 +38,21 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
 import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.request.SuccessResult
 import com.example.easy_image.BuildConfig
 import com.example.easy_image.R
+import com.example.easy_image.utils.ExoPlayerManager
 import com.example.easy_image.utils.SaveImageToCacheAndShare
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
@@ -53,45 +61,47 @@ import java.text.SimpleDateFormat
 
 
 @Composable
-fun DetailScreen(imageUrl: String, popBackStack: () -> Unit) {
-
-    var scale by remember { mutableStateOf(1f) }
-    var offsetX by remember { mutableStateOf(0f) }
-    var offsetY by remember { mutableStateOf(0f) }
+fun DetailScreen(dataUrl: String, isImage: Boolean = true, popBackStack: () -> Unit) {
 
 
-    //systemUiController.setStatusBarColor(Color.Magenta)
-    // Hide the status bar
-    // systemUiController.isStatusBarVisible = false
-    //systemUiController.isNavigationBarVisible = false
-    //systemUiController.isNavigationBarContrastEnforced = true
+    if (isImage) {
 
-    var bitmap: Bitmap? by remember { mutableStateOf(null) }
-
-    val context = LocalContext.current
-    val systemUiController = rememberSystemUiController()
-    systemUiController.isSystemBarsVisible = false
+        var scale by remember { mutableStateOf(1f) }
+        var offsetX by remember { mutableStateOf(0f) }
+        var offsetY by remember { mutableStateOf(0f) }
 
 
+        //systemUiController.setStatusBarColor(Color.Magenta)
+        // Hide the status bar
+        // systemUiController.isStatusBarVisible = false
+        //systemUiController.isNavigationBarVisible = false
+        //systemUiController.isNavigationBarContrastEnforced = true
 
-    val loader = ImageLoader(LocalContext.current)
-    val imageRequest = ImageRequest.Builder(LocalContext.current)
-        .data(imageUrl)
-        .allowHardware(false)
-        .crossfade(true)
-        .build()
+        var bitmap: Bitmap? by remember { mutableStateOf(null) }
 
-    val coroutineScope = rememberCoroutineScope()
-    SideEffect {
-        coroutineScope.launch {
-            val result = (loader.execute(imageRequest) as SuccessResult).drawable
-            bitmap = (result as BitmapDrawable).bitmap
+        val context = LocalContext.current
+        val systemUiController = rememberSystemUiController()
+        systemUiController.isSystemBarsVisible = false
+
+
+        val loader = ImageLoader(LocalContext.current)
+        val imageRequest = ImageRequest.Builder(LocalContext.current)
+            .data(dataUrl)
+            .allowHardware(false)
+            .crossfade(true)
+            .build()
+
+        val coroutineScope = rememberCoroutineScope()
+        SideEffect {
+            coroutineScope.launch {
+                val result = (loader.execute(imageRequest) as SuccessResult).drawable
+                bitmap = (result as BitmapDrawable).bitmap
+            }
         }
-    }
-    ConstraintLayout(modifier = Modifier
-        .fillMaxSize()
-        .pointerInput(Unit) {
-            awaitEachGesture {
+        ConstraintLayout(modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                awaitEachGesture {
                     awaitFirstDown()
                     do {
                         val event = awaitPointerEvent()
@@ -101,115 +111,130 @@ fun DetailScreen(imageUrl: String, popBackStack: () -> Unit) {
                         offsetY += offset.y
 
                     } while (event.changes.any { it.pressed })
-                scale = 1f
-                offsetX = 1f
-                offsetY = 1f
+                    scale = 1f
+                    offsetX = 1f
+                    offsetY = 1f
+                }
             }
-        }
 
-    ) {
-        val (shareButton, backButton, saveButton) = createRefs()
-
-        AsyncImage(
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer(
-                    scaleX = scale,
-                    scaleY = scale,
-                    translationX = offsetX,
-                    translationY = offsetY
-                ),
-            model = imageRequest,
-            contentScale = ContentScale.FillBounds,
-            contentDescription = null
-        )
-
-        Image(
-            modifier = Modifier
-                .constrainAs(backButton) {
-                    top.linkTo(parent.top)
-                    start.linkTo(parent.start)
-                }
-                .clickable {
-                    popBackStack.invoke()
-                }.padding(12.dp).size(24.dp),
-            painter = painterResource(id = R.drawable.back_button),
-            contentDescription = "save Button"
-        )
-        Image(
-            modifier = Modifier
-                .constrainAs(saveButton) {
-                    top.linkTo(parent.top)
-                    end.linkTo(shareButton.start)
-                }
-                .clickable {
+        ) {
 
 
-                    val permissionCheck = ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE
-                    )
-                    if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
-                        println("sdsd")
-                    } else {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
-                            val uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID)
+            val (shareButton, backButton, saveButton) = createRefs()
 
-                            startActivity(
-                                context,
-                                Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, uri),
-                                null
-                            )
+            AsyncImage(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer(
+                        scaleX = scale,
+                        scaleY = scale,
+                        translationX = offsetX,
+                        translationY = offsetY
+                    ),
+                model = imageRequest,
+                contentScale = ContentScale.FillBounds,
+                contentDescription = null
+            )
 
-                            return@clickable
-                        }
+            Image(
+                modifier = Modifier
+                    .constrainAs(backButton) {
+                        top.linkTo(parent.top)
+                        start.linkTo(parent.start)
+                    }
+                    .clickable {
+                        popBackStack.invoke()
+                    }
+                    .padding(12.dp)
+                    .size(24.dp),
+                painter = painterResource(id = R.drawable.back_button),
+                contentDescription = "save Button"
+            )
+            Image(
+                modifier = Modifier
+                    .constrainAs(saveButton) {
+                        top.linkTo(parent.top)
+                        end.linkTo(shareButton.start)
+                    }
+                    .clickable {
 
-                        //val imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-                        val contentValues = ContentValues()
-                        contentValues.apply {
-                            val simpleDateFormat = SimpleDateFormat("MM-dd-HH-mm-ss")
-                            val imageName = simpleDateFormat.format(System.currentTimeMillis())
 
-
-                           // val imageName = getFileName(System.currentTimeMillis())
-                            put(MediaStore.Images.Media.DISPLAY_NAME, "image-${imageName}.jpg")
-                            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
-                        }
-
-                        val uri: Uri? = context.contentResolver.insert(
-                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues
+                        val permissionCheck = ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE
                         )
-                        val outputStream: OutputStream? = uri?.let {
-                            context.contentResolver.openOutputStream(it)
+                        if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+                            println("sdsd")
+                        } else {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
+                                val uri = Uri.parse("package:" + BuildConfig.APPLICATION_ID)
+
+                                startActivity(
+                                    context,
+                                    Intent(
+                                        Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                                        uri
+                                    ),
+                                    null
+                                )
+
+                                return@clickable
+                            }
+
+                            //val imagesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                            val contentValues = ContentValues()
+                            contentValues.apply {
+                                val simpleDateFormat = SimpleDateFormat("MM-dd-HH-mm-ss")
+                                val imageName = simpleDateFormat.format(System.currentTimeMillis())
+
+
+                                // val imageName = getFileName(System.currentTimeMillis())
+                                put(MediaStore.Images.Media.DISPLAY_NAME, "image-${imageName}.jpg")
+                                put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+                            }
+
+                            val uri: Uri? = context.contentResolver.insert(
+                                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues
+                            )
+                            val outputStream: OutputStream? = uri?.let {
+                                context.contentResolver.openOutputStream(it)
+                            }
+
+                            if (outputStream != null && bitmap != null) {
+                                bitmap?.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+                            }
+
+                            outputStream?.close()
                         }
-
-                        if (outputStream != null && bitmap != null) {
-                            bitmap?.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
-                        }
-
-                        outputStream?.close()
                     }
-                }
-                .padding(12.dp)
-                .size(24.dp),
-            painter = painterResource(id = R.drawable.share_icon),
-            contentDescription = "save Button"
-        )
-        Image(
-            modifier = Modifier
-                .constrainAs(shareButton) {
-                    top.linkTo(parent.top)
-                    end.linkTo(parent.end)
-                }
-                .clickable {
-                    bitmap?.asImageBitmap()?.let {
-                        SaveImageToCacheAndShare().saveImageToCache(it, context = context)
+                    .padding(12.dp)
+                    .size(24.dp),
+                painter = painterResource(id = R.drawable.share_icon),
+                contentDescription = "save Button"
+            )
+            Image(
+                modifier = Modifier
+                    .constrainAs(shareButton) {
+                        top.linkTo(parent.top)
+                        end.linkTo(parent.end)
                     }
-                }.padding(12.dp).size(24.dp),
-            painter = painterResource(id = R.drawable.share_icon),
-            contentDescription = "Share Button"
-        )
+                    .clickable {
+                        bitmap
+                            ?.asImageBitmap()
+                            ?.let {
+                                SaveImageToCacheAndShare().saveImageToCache(it, context = context)
+                            }
+                    }
+                    .padding(12.dp)
+                    .size(24.dp),
+                painter = painterResource(id = R.drawable.share_icon),
+                contentDescription = "Share Button"
+            )
 
+
+        }
+    } else {
+        VideoDetailScreen(dataUrl)
     }
 
 }
@@ -219,6 +244,6 @@ fun DetailScreen(imageUrl: String, popBackStack: () -> Unit) {
 
 @Preview
 @Composable
-private fun PreviewDetailScreen(){
+private fun PreviewDetailScreen() {
     SearchScreen()
 }
