@@ -141,7 +141,7 @@ fun VideoItemScreen(
         if (videoItemDTO.isMusicOpen){
             ExoPlayerManager.setMediaItem(
                 exoPlayer = exoPlayer,
-                videoUri = videoItemDTO.videoUrl,
+                videoUri = videoItemDTO.videoPreviewUrl,
             )
         }else {
             exoPlayer.stop()

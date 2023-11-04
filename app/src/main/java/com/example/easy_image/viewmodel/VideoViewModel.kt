@@ -41,7 +41,7 @@ class VideoViewModel : MainViewModel() {
             viewModelScope.launch {
                 val videos = videoService.getVideos(
                     key = "39342921-c040c554a9e966b3202b73519",
-                    query = "river",
+                    query = "train",
                     page = currentImageRequestPage
                 )
                 val videoList = videos?.hits?.filterIndexed { index, videoItem ->
@@ -50,6 +50,7 @@ class VideoViewModel : MainViewModel() {
 
                     VideoItemDTO(
                         videoItem.id,
+                        videoItem.videos?.medium?.url ?: "",
                         videoItem.videos?.large?.url ?: "",
                         index == 0 && _videos.value == null,
                     )
@@ -75,6 +76,7 @@ class VideoViewModel : MainViewModel() {
 
             VideoItemDTO(
                 it.id.ignoreNull(),
+                it.videoPreviewUrl,
                 it.videoUrl,
                 isMusicOpen,
             )

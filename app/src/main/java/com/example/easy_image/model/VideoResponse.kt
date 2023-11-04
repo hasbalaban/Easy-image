@@ -39,6 +39,7 @@ data class VideoSize(
 
 data class VideoItemDTO(
     val id : Int,
+    val videoPreviewUrl : String,
     val videoUrl : String,
     val isMusicOpen : Boolean = false,
 )
