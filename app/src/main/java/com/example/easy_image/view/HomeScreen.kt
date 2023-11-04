@@ -39,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
@@ -186,8 +187,6 @@ fun HomeScreen(
                     Icon(imageVector = Icons.Outlined.MoreVert, contentDescription = "Options")
                 }
             })
-    }, floatingActionButton = {
-        photos.value?.hits?.size?.let { FloatActionContent(coroutines, state, it, gridCellCount) }
     }) {
         Column(modifier = Modifier.padding(it)) {
 
@@ -209,6 +208,7 @@ fun HomeScreen(
 
                         val isChecked = selectedImagesToShare.any { it.first == item.id }
                         val imageUrl by remember { mutableStateOf(item.imageURL ?: item.largeImageURL ?: item.fullHDURL ?: item.previewURL) }
+
 
 
                         ImageItem(
@@ -281,51 +281,6 @@ private fun ClickDropDownMenuItem(cellCount: Int, onClickMenuItem: () -> Unit) {
 }
 
 @Composable
-private fun FloatActionContent(
-    coroutines: CoroutineScope,
-    state: LazyGridState,
-    lastIndex: Int,
-    gridCellCount: Int
-) {
-    Column() {
-        Image(
-            modifier = Modifier
-                .background(Color.White)
-                .padding(4.dp)
-                .clickable {
-                    coroutines.launch {
-                        var targetPosition =
-                            (state.layoutInfo.visibleItemsInfo.firstOrNull()?.index.ignoreNull()) - (gridCellCount * 2)
-                        targetPosition = if (targetPosition <= 0) 0 else targetPosition
-
-                        state.animateScrollToItem(targetPosition)
-                    }
-                },
-            colorFilter = ColorFilter.tint(Color.Black),
-            painter = painterResource(id = R.drawable.arrow_upward),
-            contentDescription = "go to up"
-        )
-        Spacer(modifier = Modifier.height(6.dp))
-        Image(modifier = Modifier
-            .clickable {
-                coroutines.launch {
-                    var targetPosition =
-                        (state.layoutInfo.visibleItemsInfo.firstOrNull()?.index.ignoreNull()) + (gridCellCount * 4)
-                    targetPosition = if (targetPosition > lastIndex) lastIndex else targetPosition
-
-                    state.animateScrollToItem(targetPosition)
-                }
-            }
-            .padding(top = 6.dp)
-            .background(Color.White)
-            .padding(4.dp),
-            colorFilter = ColorFilter.tint(Color.Black),
-            painter = painterResource(id = R.drawable.arrow_downward),
-            contentDescription = "go to bottom")
-    }
-}
-
-@Composable
 private fun ImageItem(
     gridCellCount: Int,
     item: Hits,
@@ -350,7 +305,7 @@ private fun ImageItem(
 
     ConstraintLayout(modifier = Modifier
         .fillMaxWidth()
-        .height(120.dp)) {
+        .height(200.dp)) {
         val (checkBox) = createRefs()
         val painter1 = rememberAsyncImagePainter(
             model = ImageRequest.Builder(LocalContext.current)
@@ -381,13 +336,13 @@ private fun ImageItem(
         ImageLoader.Builder(context)
             .memoryCache {
                 MemoryCache.Builder(context)
-                    .maxSizePercent(0.65)
+                    .maxSizePercent(0.05)
                     .build()
             }
             .diskCache {
                 DiskCache.Builder()
                     .directory(context.cacheDir.resolve("image_cache"))
-                    .maxSizePercent(0.4)
+                    .maxSizePercent(0.04)
                     .build()
             }
             .eventListener(listener = eventListener)
@@ -423,8 +378,8 @@ private fun ImageItem(
                         })
                 }
                 .fillMaxWidth()
-                .size(120.dp),
-            contentScale = ContentScale.FillBounds
+                .height(200.dp),
+            contentScale = ContentScale.Fit
         )
 
         Image(modifier = Modifier
