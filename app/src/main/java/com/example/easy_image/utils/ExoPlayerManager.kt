@@ -29,10 +29,10 @@ object ExoPlayerManager {
     }
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-    private fun createNewPlayer(context: Context): ExoPlayer {
+    fun createNewPlayer(context: Context): ExoPlayer {
         val player = ExoPlayer.Builder(context).build()
         player.setHandleAudioBecomingNoisy(true)
-        player.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT
+        player.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
         return player
     }
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
