@@ -100,48 +100,56 @@ fun VideoItemScreen(videoItemDTO: VideoItemDTO) {
 
     val exoPlayer by remember {
         mutableStateOf(
-            ExoPlayerManager.initializePlayer(context).apply {
-                volume = if (videoItemDTO.isMusicOpen) 1f else 0f
-                setHandleAudioBecomingNoisy(true)
-                videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT
+            ExoPlayerManager.initializePlayer(context)
+        )
+    }
+
+    DisposableEffect(AndroidView(modifier = Modifier
+        .fillMaxWidth()
+        .height(240.dp), factory = {
+        PlayerView(context).apply {
+            player = exoPlayer.apply {
+                setShowBuffering(SHOW_BUFFERING_ALWAYS)
+                useController = false
 
             }
-        )
+        }
     }
-
-
-    DisposableEffect(key1 = true) {
+    )) {
         onDispose {
-            ExoPlayerManager.releasePlayer(exoPlayer = exoPlayer, videoItemDTO)
+            ExoPlayerManager.releasePlayer(exoPlayer = exoPlayer)
         }
     }
 
-
-    if (videoItemDTO.isMusicOpen){
-        ExoPlayerManager.setMediaItem(
-            exoPlayer = exoPlayer,
-            videoUri = videoItemDTO.videoUrl,
-            playbackPosition = videoItemDTO.playbackPosition
-        )
-    }else {
-        exoPlayer.stop()
-    }
-
-
-    AndroidView(modifier = Modifier
-        .fillMaxWidth()
-        .height(240.dp), factory = { PlayerView(context).apply {
-        player = exoPlayer.apply {
-            setShowBuffering(SHOW_BUFFERING_ALWAYS)
+    LaunchedEffect(videoItemDTO.isMusicOpen){
+        exoPlayer.volume = if (videoItemDTO.isMusicOpen) 1f else 0f
+        if (videoItemDTO.isMusicOpen){
+            ExoPlayerManager.setMediaItem(
+                exoPlayer = exoPlayer,
+                videoUri = videoItemDTO.videoUrl,
+            )
+        }else {
+            exoPlayer.stop()
         }
-        controllerShowTimeoutMs = 10
-        useController = false
-    } }
-    )
-    if (videoItemDTO.isMusicOpen.not()){
-        Image(
-            modifier = Modifier.fillMaxWidth().height(240.dp).padding(100.dp),
-            painter = painterResource(id = R.drawable.ic_video), contentDescription = null)
     }
+
+    DisposableEffect(
+        if (videoItemDTO.isMusicOpen.not()) {
+            Image(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(240.dp)
+                    .padding(100.dp),
+                painter = painterResource(id = R.drawable.ic_video), contentDescription = null
+            )
+        } else {
+
+        }
+    ) {
+        onDispose { }
+
+    }
+
+
 }
 
