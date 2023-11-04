@@ -2,6 +2,7 @@ package com.example.easy_image.view
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -36,6 +38,7 @@ import com.example.easy_image.viewmodel.VideoViewModel
 @Composable
 fun VideoScreen(
     navController: NavController,
+    openVideoDetail: (String) -> Unit,
     viewModel: VideoViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
     LaunchedEffect(Unit) {
@@ -62,9 +65,6 @@ fun VideoScreen(
                 ) {
 
                     Column(modifier = Modifier
-                        .clickable {
-                            viewModel.videoMusicStatusChanged(it.id)
-                        }
                         .padding(top = 20.dp)
                         .fillMaxWidth()) {
                         Box(modifier = Modifier
@@ -72,7 +72,7 @@ fun VideoScreen(
                             .height(240.dp),
                             contentAlignment = Alignment.TopEnd
                         ) {
-                            VideoItemScreen(it)
+                            VideoItemScreen(it, openVideoDetail, viewModel)
 
                             val imageIcon = if (it.isMusicOpen) R.drawable.music_on else R.drawable.music_off
                             Image(
@@ -93,7 +93,11 @@ fun VideoScreen(
 }
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 @Composable
-fun VideoItemScreen(videoItemDTO: VideoItemDTO) {
+fun VideoItemScreen(
+    videoItemDTO: VideoItemDTO,
+    openVideoDetail: (String) -> Unit,
+    viewModel: VideoViewModel
+) {
     val context = LocalContext.current
 
 
@@ -105,6 +109,17 @@ fun VideoItemScreen(videoItemDTO: VideoItemDTO) {
     }
 
     DisposableEffect(AndroidView(modifier = Modifier
+        .pointerInput(Unit){
+            detectTapGestures(
+                onDoubleTap = {
+                    openVideoDetail(videoItemDTO.videoUrl)
+                },
+                onTap = {
+                    viewModel.videoMusicStatusChanged(videoItemDTO.id)
+                }
+            )
+
+        }
         .fillMaxWidth()
         .height(240.dp), factory = {
         PlayerView(context).apply {
