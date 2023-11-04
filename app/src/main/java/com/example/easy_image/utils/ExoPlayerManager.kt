@@ -2,6 +2,7 @@ package com.example.easy_image.utils
 
 import android.content.Context
 import android.util.Log
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.database.DatabaseProvider
@@ -13,7 +14,6 @@ import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
-import com.example.easy_image.model.VideoItemDTO
 import java.io.File
 
 
@@ -30,24 +30,15 @@ object ExoPlayerManager {
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     private fun createNewPlayer(context: Context): ExoPlayer {
-        val player = ExoPlayer.Builder(context).build().also {player ->
-
-
-        //    val channelMixingProcessor = ChannelMixingAudioProcessor()
-        //    val rotateEffect = ScaleAndRotateTransformation.Builder().setRotationDegrees(60f).build()
-       //     val cropEffect = Crop(-0.5f, 0.5f, -0.5f, 0.5f)
-
-         //   val effects = Effects(listOf(channelMixingProcessor), listOf(rotateEffect, cropEffect))
-           // player.setVideoEffects(effects.videoEffects)
-        }
+        val player = ExoPlayer.Builder(context).build()
         player.setHandleAudioBecomingNoisy(true)
+        player.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT
         return player
     }
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     fun setMediaItem(
         exoPlayer: ExoPlayer,
         videoUri: String,
-        playbackPosition: Int = 0,
     ) {
         val cacheDataSourceFactory: DataSource.Factory =
             CacheDataSource.Factory()
@@ -66,7 +57,7 @@ object ExoPlayerManager {
         exoPlayer.play()
     }
 
-    fun releasePlayer(exoPlayer: ExoPlayer, listItems: VideoItemDTO) {
+    fun releasePlayer(exoPlayer: ExoPlayer) {
         exoPlayer.stop()
         exoPlayer.clearMediaItems()
         players.add(exoPlayer)
