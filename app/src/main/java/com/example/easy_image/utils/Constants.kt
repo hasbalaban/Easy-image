@@ -6,7 +6,7 @@ sealed class NavigationDirections(val route: String) {
     object Favorite : NavigationDirections("favoriteScreen")
     object Video : NavigationDirections("videoScreen")
     object SearchScreen : NavigationDirections("SearchScreen")
-    object DetailScreen: NavigationDirections("DetailScreen?imageUrl={imageUrl}") {
+    object DetailScreen: NavigationDirections("DetailScreen?imageUrl={imageUrl}&hash={hash}") {
         fun createRoute(imageUrl: String) = "DetailScreen?imageUrl=$imageUrl"
     }
 

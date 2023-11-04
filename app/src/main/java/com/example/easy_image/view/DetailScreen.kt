@@ -240,6 +240,45 @@ fun DetailScreen(dataUrl: String, isImage: Boolean = true, popBackStack: () -> U
 }
 
 
+@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+@Composable
+private fun VideoDetailScreen(videoUrl: String) {
+    val context = LocalContext.current
+
+    val exoPlayer by remember {
+        mutableStateOf(
+            ExoPlayerManager.createNewPlayer(context)
+        )
+    }
+
+    DisposableEffect(AndroidView(modifier = Modifier
+        .fillMaxSize(), factory = {
+        PlayerView(context).apply {
+            resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
+            player = exoPlayer.apply {
+                setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
+
+            }
+        }
+    }
+    )) {
+        onDispose {
+            exoPlayer.release()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+
+        val mediaItem = MediaItem.fromUri(videoUrl)
+
+        exoPlayer.setMediaItem(mediaItem)
+        exoPlayer.repeatMode = Player.REPEAT_MODE_ONE
+        exoPlayer.playWhenReady = true
+        exoPlayer.prepare()
+        exoPlayer.play()
+    }
+
+}
 
 
 @Preview
