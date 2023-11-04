@@ -53,6 +53,7 @@ class VideoViewModel : MainViewModel() {
                         videoItem.videos?.medium?.url ?: "",
                         videoItem.videos?.large?.url ?: "",
                         index == 0 && _videos.value == null,
+                        videoItem.tags ?: "",
                     )
                 }
 
@@ -79,6 +80,7 @@ class VideoViewModel : MainViewModel() {
                 it.videoPreviewUrl,
                 it.videoUrl,
                 isMusicOpen,
+                it.videoTag,
             )
         }
         _videos.value = null

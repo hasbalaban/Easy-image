@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -21,10 +22,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.ui.PlayerView
 import androidx.media3.ui.PlayerView.SHOW_BUFFERING_ALWAYS
@@ -69,7 +73,7 @@ fun VideoScreen(
                         .fillMaxWidth()) {
                         Box(modifier = Modifier
                             .fillMaxSize()
-                            .height(240.dp),
+                            .height(220.dp),
                             contentAlignment = Alignment.TopEnd
                         ) {
                             VideoItemScreen(it, openVideoDetail, viewModel)
@@ -84,6 +88,14 @@ fun VideoScreen(
                                 painter = painterResource(id = imageIcon), contentDescription = "sound status" )
 
                         }
+                        Text(
+                            modifier = Modifier.fillMaxWidth()
+                                .padding(start = 8.dp, top = 2.dp),
+                            text = it.videoTag,
+                            color = Color.Black,
+                            fontSize = 14.sp,
+                            fontFamily = FontFamily.SansSerif
+                        )
                     }
 
                 }
@@ -109,7 +121,7 @@ fun VideoItemScreen(
     }
 
     DisposableEffect(AndroidView(modifier = Modifier
-        .pointerInput(Unit){
+        .pointerInput(Unit) {
             detectTapGestures(
                 onDoubleTap = {
                     openVideoDetail(videoItemDTO.videoUrl)
@@ -121,7 +133,7 @@ fun VideoItemScreen(
 
         }
         .fillMaxWidth()
-        .height(240.dp), factory = {
+        .height(220.dp), factory = {
         PlayerView(context).apply {
             player = exoPlayer.apply {
                 setShowBuffering(SHOW_BUFFERING_ALWAYS)
@@ -153,8 +165,8 @@ fun VideoItemScreen(
             Image(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(240.dp)
-                    .padding(100.dp),
+                    .height(220.dp)
+                    .padding(90.dp),
                 painter = painterResource(id = R.drawable.ic_video), contentDescription = null
             )
         } else {

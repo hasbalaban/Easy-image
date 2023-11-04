@@ -42,4 +42,5 @@ data class VideoItemDTO(
     val videoPreviewUrl : String,
     val videoUrl : String,
     val isMusicOpen : Boolean = false,
+    val videoTag : String
 )
