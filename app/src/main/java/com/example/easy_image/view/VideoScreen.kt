@@ -10,12 +10,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -26,7 +24,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.media3.common.C
 import androidx.media3.ui.PlayerView
 import androidx.media3.ui.PlayerView.SHOW_BUFFERING_ALWAYS
 import androidx.navigation.NavController
@@ -41,27 +38,11 @@ fun VideoScreen(
     navController: NavController,
     viewModel: VideoViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
-
-    val scrollState = remember { LazyListState() }
-    val playedVideo = remember {
-        derivedStateOf {
-            ((scrollState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
-                ?: 0) + (scrollState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0)) / 2
-        }
-    }
-
-
     LaunchedEffect(Unit) {
         viewModel.getVideos()
     }
 
     val videos = viewModel.videos.observeAsState()
-
-    if (videos.value == null){
-        println("")
-    }
-
-
 
     Column(
         modifier = Modifier.fillMaxSize(),
