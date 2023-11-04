@@ -379,7 +379,7 @@ private fun ImageItem(
                 }
                 .fillMaxWidth()
                 .height(200.dp),
-            contentScale = ContentScale.Fit
+            contentScale = ContentScale.FillBounds
         )
 
         Image(modifier = Modifier
