@@ -257,6 +257,7 @@ private fun VideoDetailScreen(videoUrl: String) {
             resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
             player = exoPlayer.apply {
                 setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
+                useController = false
 
             }
         }
