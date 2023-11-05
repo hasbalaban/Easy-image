@@ -160,21 +160,15 @@ fun VideoItemScreen(
         }
     }
 
-    DisposableEffect(
-        if (videoItemDTO.isMusicOpen.not()) {
-            Image(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(230.dp)
-                    .padding(95.dp),
-                painter = painterResource(id = R.drawable.ic_video), contentDescription = null
-            )
-        } else {
 
-        }
-    ) {
-        onDispose { }
-
+    if (videoItemDTO.isMusicOpen.not()) {
+        Image(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(230.dp)
+                .padding(95.dp),
+            painter = painterResource(id = R.drawable.ic_video), contentDescription = null
+        )
     }
 
 
