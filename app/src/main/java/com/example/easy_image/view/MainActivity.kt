@@ -37,14 +37,16 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.easy_image.utils.NavigationDirections
 import com.example.easy_image.R
-import com.example.easy_image.model.FavoriteDTO
+import com.easyImage.mediapi.model.FavoriteDTO
 import com.example.easy_image.ui.theme.SaveWhattsappMediaTheme
 import com.example.easy_image.utils.EnterAnimation
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlin.system.measureTimeMillis
 
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     init {

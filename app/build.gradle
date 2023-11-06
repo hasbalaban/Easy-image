@@ -1,7 +1,12 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
-    id("com.google.dagger.hilt.android") version "2.44" apply false
+
+
+  //  id("com.google.dagger.hilt.android") version "2.44" apply false
+    id 'kotlin-kapt'
+    id 'com.google.dagger.hilt.android'
+
 
 }
 
@@ -120,7 +125,9 @@ dependencies {
 
 
     //hilt
-    implementation ("androidx.hilt:hilt-navigation-compose:1.0.0")
+    implementation ("androidx.hilt:hilt-navigation-compose:1.1.0")
+    implementation "com.google.dagger:hilt-android:2.44"
+    kapt "com.google.dagger:hilt-compiler:2.44"
 
 
     implementation "com.google.accompanist:accompanist-systemuicontroller:0.30.0"
@@ -142,4 +149,8 @@ dependencies {
     implementation "androidx.media3:media3-effect:1.1.1"
     implementation "androidx.media3:media3-common:1.1.1"
 
+}
+
+kapt {
+    correctErrorTypes true
 }
