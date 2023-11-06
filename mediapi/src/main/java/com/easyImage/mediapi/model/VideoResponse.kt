@@ -1,4 +1,4 @@
-package com.example.easy_image.model
+package com.easyImage.mediapi.model
 
 data class VideoResponse(
     val total: Int?,

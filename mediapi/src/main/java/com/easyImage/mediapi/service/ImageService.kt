@@ -1,6 +1,6 @@
-package com.example.easy_image.service
+package com.easyImage.mediapi.service
 
-import com.example.easy_image.model.ImageResponse
+import com.easyImage.mediapi.model.ImageResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 

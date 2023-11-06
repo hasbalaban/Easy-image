@@ -40,7 +40,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
 import com.example.easy_image.R
-import com.example.easy_image.model.FavoriteDTO
+import com.easyImage.mediapi.model.FavoriteDTO
 import com.example.easy_image.utils.permission.getPermissions
 
 @Composable

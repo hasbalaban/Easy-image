@@ -34,7 +34,7 @@ import androidx.media3.ui.PlayerView
 import androidx.media3.ui.PlayerView.SHOW_BUFFERING_ALWAYS
 import androidx.navigation.NavController
 import com.example.easy_image.R
-import com.example.easy_image.model.VideoItemDTO
+import com.easyImage.mediapi.model.VideoItemDTO
 import com.example.easy_image.utils.ExoPlayerManager
 import com.example.easy_image.viewmodel.VideoViewModel
 

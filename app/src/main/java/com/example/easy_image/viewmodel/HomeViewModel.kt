@@ -3,8 +3,9 @@ package com.example.easy_image.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.easy_image.model.ImageDTO
-import com.example.easy_image.service.ImageService
+import com.easyImage.mediapi.model.ImageDTO
+import com.easyImage.mediapi.repository.video.VideoRepository
+import com.easyImage.mediapi.service.ImageService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
@@ -13,7 +14,19 @@ import javax.inject.Inject
 import kotlin.Exception
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(): MainViewModel() {
+class HomeViewModel @Inject constructor(
+    private val videoRepository : VideoRepository
+): MainViewModel() {
+
+    init {
+        viewModelScope.launch {
+            for (i in 0..20) {
+                println(videoRepository.getVideos(i.toLong()))
+            }
+        }
+    }
+
+
     private val _photos = MutableLiveData<List<ImageDTO>?>()
     val photos : LiveData<List<ImageDTO>?> get() = _photos
     private var currentImageRequestPage = 1
