@@ -31,3 +31,12 @@ data class Hits (
     val user_id : String?,
     val user : String?,
     val userImageURL : String?)
+
+
+data class ImageDTO(
+    val id : Int,
+    val previewURL : String?,
+    val largeImageURL : String?,
+    val fullHDURL : String?,
+    val imageURL : String?,
+    )

@@ -66,20 +66,16 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.EventListener
-import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import coil.request.ImageRequest
-import coil.request.SuccessResult
 import coil.size.Size
-import com.example.easy_image.model.Hits
 import com.example.easy_image.R
 import com.example.easy_image.utils.SaveImageToCacheAndShare
 import com.example.easy_image.viewmodel.HomeViewModel
-import com.example.easy_image.utils.ignoreNull
 import com.example.easy_image.model.FavoriteDTO
+import com.example.easy_image.model.ImageDTO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -98,7 +94,7 @@ fun HomeScreen(
 
     val photos = viewModel.photos.observeAsState()
     val state = rememberLazyGridState()
-    val shouldGetNewPage by remember { derivedStateOf { (state.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0) >= ((photos.value?.hits?.size ?: 1) * 0.8) } }
+    val shouldGetNewPage by remember { derivedStateOf { (state.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0) >= ((photos.value?.size ?: 1) * 0.8) } }
     var searchedImageText by remember { mutableStateOf("planet") }
     var gridCellCount by remember { mutableStateOf(1) }
 
@@ -187,10 +183,10 @@ fun HomeScreen(
                     Icon(imageVector = Icons.Outlined.MoreVert, contentDescription = "Options")
                 }
             })
-    }) {
-        Column(modifier = Modifier.padding(it)) {
+    }) {paddingValues ->
+        photos.value?.let {
+        Column(modifier = Modifier.padding(paddingValues)) {
 
-            photos.value?.hits?.let {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(gridCellCount),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -249,7 +245,6 @@ private fun DropDownMenu(
             onStateChanged.invoke(false)
         }, offset = DpOffset(x = 10.dp, y = (-60).dp)
     ) {
-        val context = LocalContext.current
         ClickDropDownMenuItem(1){
             gridCellCountChanged.invoke(1)
             onStateChanged.invoke(false)
@@ -283,7 +278,7 @@ private fun ClickDropDownMenuItem(cellCount: Int, onClickMenuItem: () -> Unit) {
 @Composable
 private fun ImageItem(
     gridCellCount: Int,
-    item: Hits,
+    item: ImageDTO,
     openImageDetail: (String) -> Unit,
     onImageLongClicked: () -> Unit,
     isChecked: Boolean,

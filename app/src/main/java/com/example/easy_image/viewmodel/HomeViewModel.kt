@@ -2,24 +2,20 @@ package com.example.easy_image.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.easy_image.model.Hits
-import com.example.easy_image.model.ImageResponse
+import com.example.easy_image.model.ImageDTO
 import com.example.easy_image.service.ImageService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.GET
-import retrofit2.http.Query
 import javax.inject.Inject
 import kotlin.Exception
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(): MainViewModel() {
-    private val _photos = MutableLiveData<ImageResponse?>()
-    val photos : LiveData<ImageResponse?> get() = _photos
+    private val _photos = MutableLiveData<List<ImageDTO>?>()
+    val photos : LiveData<List<ImageDTO>?> get() = _photos
     private var currentImageRequestPage = 1
 
     fun getPhotos(
@@ -51,18 +47,22 @@ class HomeViewModel @Inject constructor(): MainViewModel() {
                     page = currentImageRequestPage
                 )
                 photos?.let {
-                    val images: List<Hits>? = it.hits?.let { newList ->
+                    it.hits?.let { newList ->
 
-                        newList.forEach{item ->
+                        val lastList = newList.map{item ->
+                            ImageDTO(
+                                id = item.id,
+                                previewURL = item.previewURL,
+                                largeImageURL = item.largeImageURL,
+                                fullHDURL = item.fullHDURL,
+                                imageURL = item.imageURL,
+                            )
                         }
 
-                        (_photos.value?.hits ?: mutableListOf()).plus(newList)
+                        _photos.value = (_photos.value ?: mutableListOf()).plus(lastList)
+
                     }
 
-
-                    _photos.value = it.copy(
-                        hits = images
-                    )
                     currentImageRequestPage += 1
                 }
             }
