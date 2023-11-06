@@ -173,8 +173,10 @@ class MainActivity : ComponentActivity() {
                     type = androidx.navigation.NavType.StringType; defaultValue = ""
                 })) {
 
-                val imageUrl = (it.arguments?.getString("imageUrl") + "&hash="+ it.arguments?.getString("hash")) ?: ""
+                val imageUrl = (it.arguments?.getString("imageUrl")) ?: ""
                 val isImageUrl = imageUrl.contains(".jpg") || imageUrl.contains(".mp4").not()
+
+                if (isImageUrl) imageUrl + "&hash="+ it.arguments?.getString("hash")
 
                 val lifeCycleOwner = LocalLifecycleOwner.current
                 val activity = context as Activity
