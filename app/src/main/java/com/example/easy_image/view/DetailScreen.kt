@@ -83,21 +83,17 @@ fun DetailScreen(dataUrl: String, isImage: Boolean = true, popBackStack: () -> U
         val systemUiController = rememberSystemUiController()
         systemUiController.isSystemBarsVisible = false
 
+        val painter = rememberAsyncImagePainter(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(dataUrl)
+                .listener { _, result ->
+                    if (bitmap == null){
+                        bitmap = (result.drawable  as BitmapDrawable).bitmap
+                    }                }
+                .size(Size.ORIGINAL)
+                .build()
+        )
 
-        val loader = ImageLoader(LocalContext.current)
-        val imageRequest = ImageRequest.Builder(LocalContext.current)
-            .data(dataUrl)
-            .allowHardware(false)
-            .crossfade(true)
-            .build()
-
-        val coroutineScope = rememberCoroutineScope()
-        SideEffect {
-            coroutineScope.launch {
-                val result = (loader.execute(imageRequest) as SuccessResult).drawable
-                bitmap = (result as BitmapDrawable).bitmap
-            }
-        }
         ConstraintLayout(modifier = Modifier
             .fillMaxSize()
             .pointerInput(Unit) {
@@ -122,7 +118,7 @@ fun DetailScreen(dataUrl: String, isImage: Boolean = true, popBackStack: () -> U
 
             val (shareButton, backButton, saveButton) = createRefs()
 
-            AsyncImage(
+            Image(
                 modifier = Modifier
                     .fillMaxSize()
                     .graphicsLayer(
@@ -131,7 +127,7 @@ fun DetailScreen(dataUrl: String, isImage: Boolean = true, popBackStack: () -> U
                         translationX = offsetX,
                         translationY = offsetY
                     ),
-                model = imageRequest,
+                painter = painter,
                 contentScale = ContentScale.FillBounds,
                 contentDescription = null
             )
