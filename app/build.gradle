@@ -30,11 +30,13 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
         }
 
         debug{
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
         }
 
     }
@@ -64,9 +66,23 @@ android {
         }
     }
 
+    flavorDimensions "default"
+
+    productFlavors{
+        mainApp {
+            applicationId "com.example.easy_image"
+        }
+        debugApp {
+            applicationId "com.easyImage.data"
+        }
+    }
+
 }
 
 dependencies {
+
+    implementation fileTree(include: ['*.aar'], dir: 'libs' )
+    implementation project(':mediapi')
 
     implementation 'androidx.core:core-ktx:1.8.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
