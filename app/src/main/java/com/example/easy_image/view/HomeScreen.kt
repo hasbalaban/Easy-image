@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.widget.Toast
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -12,13 +11,10 @@ import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -39,7 +35,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
@@ -202,7 +197,9 @@ fun HomeScreen(
                         }
                     ) { item ->
 
-                        val isChecked = selectedImagesToShare.any { it.first == item.id }
+                        val isChecked by remember {
+                            mutableStateOf(selectedImagesToShare.any { it.first == item.id })
+                        }
                         val imageUrl by remember { mutableStateOf(item.imageURL ?: item.largeImageURL ?: item.fullHDURL ?: item.previewURL) }
 
 
@@ -298,54 +295,40 @@ private fun ImageItem(
         it.id == item.id
     }) }
 
-    ConstraintLayout(modifier = Modifier
-        .fillMaxWidth()
-        .height(200.dp)) {
-        val (checkBox) = createRefs()
-        val painter1 = rememberAsyncImagePainter(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(imageUrl)
-                .listener { _, result ->
+
+    val context = LocalContext.current
+    val painter = rememberAsyncImagePainter(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(imageUrl)
+            .listener { _, result ->
+                if (bitmap == null){
                     bitmap = (result.drawable  as BitmapDrawable).bitmap
-                }
-                .size(Size.ORIGINAL)
-                .build()
-        )
-
-        val context = LocalContext.current
-
-
-        val eventListener = object : EventListener{
-            override fun onSuccess(request: ImageRequest, result: SuccessResult) {
-                super.onSuccess(request, result)
-                ImageRequest.Builder(context)
-                    .data(imageUrl)
-                    .listener { _, _ ->
-                        bitmap = (result.drawable  as BitmapDrawable).bitmap
-                    }
-                    .size(Size.ORIGINAL)
-                    .build()
-            }
-        }
-
-        ImageLoader.Builder(context)
-            .memoryCache {
+                }                }
+            .size(Size.ORIGINAL)
+            .build()
+    ).apply {
+        imageLoader.apply {
+            memoryCache?.let {
                 MemoryCache.Builder(context)
                     .maxSizePercent(0.05)
                     .build()
             }
-            .diskCache {
+            diskCache?.let {
                 DiskCache.Builder()
                     .directory(context.cacheDir.resolve("image_cache"))
                     .maxSizePercent(0.04)
                     .build()
             }
-            .eventListener(listener = eventListener)
-            .build()
-        val deliveredPainter by remember { derivedStateOf {painter1} }
+        }
+    }
+
+    ConstraintLayout(modifier = Modifier
+        .fillMaxWidth()
+        .height(200.dp)) {
+        val (checkBox) = createRefs()
 
         Image(
-            painter = deliveredPainter,
+            painter = painter,
             contentDescription = null,
             modifier = Modifier
                 .graphicsLayer(
@@ -376,6 +359,8 @@ private fun ImageItem(
                 .height(200.dp),
             contentScale = ContentScale.FillBounds
         )
+
+
 
         Image(modifier = Modifier
             .clickable {
