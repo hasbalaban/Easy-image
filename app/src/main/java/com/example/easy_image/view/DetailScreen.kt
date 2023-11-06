@@ -12,24 +12,31 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.provider.Settings
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateZoom
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -46,16 +53,14 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
-import coil.ImageLoader
-import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-import coil.request.SuccessResult
+import coil.size.Size
 import com.example.easy_image.BuildConfig
 import com.example.easy_image.R
 import com.example.easy_image.utils.ExoPlayerManager
 import com.example.easy_image.utils.SaveImageToCacheAndShare
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import kotlinx.coroutines.launch
 import java.io.OutputStream
 import java.text.SimpleDateFormat
 
@@ -241,28 +246,51 @@ fun DetailScreen(dataUrl: String, isImage: Boolean = true, popBackStack: () -> U
 private fun VideoDetailScreen(videoUrl: String) {
     val context = LocalContext.current
 
-    val exoPlayer by remember {
-        mutableStateOf(
-            ExoPlayerManager.createNewPlayer(context)
-        )
-    }
+    val exoPlayer by remember { mutableStateOf(ExoPlayerManager.createNewPlayer(context)) }
+    var fraction by remember { mutableStateOf(0.5f) }
 
-    DisposableEffect(AndroidView(modifier = Modifier
-        .fillMaxSize(), factory = {
-        PlayerView(context).apply {
-            resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
-            player = exoPlayer.apply {
-                setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
-                useController = false
 
+    Box(contentAlignment = Alignment.BottomStart) {
+        DisposableEffect(AndroidView(modifier = Modifier
+            .fillMaxSize(), factory = {
+            PlayerView(context).apply {
+                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
+                player = exoPlayer.apply {
+                    setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
+                    useController = false
+
+                    addListener(object  : Player.Listener{
+
+                        override fun onPositionDiscontinuity(
+                            oldPosition: Player.PositionInfo,
+                            newPosition: Player.PositionInfo,
+                            reason: Int
+                        ) {
+                            super.onPositionDiscontinuity(oldPosition, newPosition, reason)
+                            val duration = (exoPlayer.duration / 1000).toDouble()
+                            val currentPosition = (exoPlayer.currentPosition / 1000) .toDouble()
+                            val percent = (currentPosition / duration)
+
+                            if (percent > 0f && percent != fraction.toDouble() ) {
+                                fraction = percent.toFloat()
+                            }
+                        }
+
+
+                    })
+
+                }
             }
         }
-    }
-    )) {
-        onDispose {
-            exoPlayer.release()
+        )) {
+            onDispose {
+                exoPlayer.release()
+            }
         }
+
+        Duration(fraction = fraction)
     }
+
 
     LaunchedEffect(Unit) {
 
@@ -275,6 +303,20 @@ private fun VideoDetailScreen(videoUrl: String) {
         exoPlayer.play()
     }
 
+}
+
+@Composable
+private fun Duration(fraction : Float){
+
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .height(6.dp)
+        .background(Color.Black)
+        .padding(vertical = 2.dp, horizontal = 4.dp)) {
+
+        Spacer(modifier = Modifier.background(Color.White).fillMaxHeight().fillMaxWidth(fraction))
+
+    }
 }
 
 
