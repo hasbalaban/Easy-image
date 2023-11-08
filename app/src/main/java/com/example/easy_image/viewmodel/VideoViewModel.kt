@@ -21,7 +21,7 @@ class VideoViewModel @Inject constructor(
     private var currentImageRequestPage = 1
 
     fun getVideos(
-        query: String = "planet",
+        query: String = "roket",
         shouldClearPhotos : Boolean = false
     ){
         var queryText = query
