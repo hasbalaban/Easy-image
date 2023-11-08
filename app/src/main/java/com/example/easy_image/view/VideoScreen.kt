@@ -64,51 +64,6 @@ fun VideoScreen(
       //  val context = LocalContext.current
 
 
-        videos.value?.let {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(it,
-                    key = {
-                        it.id
-                    }
-                ) {
-
-                    Column(modifier = Modifier
-                        .padding(top = 20.dp)
-                        .fillMaxWidth()) {
-                        Box(modifier = Modifier
-                            .fillMaxSize()
-                            .height(230.dp),
-                            contentAlignment = Alignment.TopEnd
-                        ) {
-                            VideoItemScreen(it, openVideoDetail, viewModel)
-
-                            val imageIcon = if (it.isMusicOpen) R.drawable.music_on else R.drawable.music_off
-                            Image(
-                                modifier = Modifier
-                                    .clickable {
-                                        viewModel.videoMusicStatusChanged(it.id)
-                                    }
-                                    .padding(12.dp),
-                                painter = painterResource(id = imageIcon), contentDescription = "sound status" )
-
-                        }
-                        Text(
-                            modifier = Modifier.fillMaxWidth()
-                                .padding(start = 8.dp, top = 2.dp),
-                            text = it.videoTag,
-                            color = Color.Black,
-                            fontSize = 14.sp,
-                            fontFamily = FontFamily.SansSerif
-                        )
-                    }
-
-                }
-            }
-        }
-
-
-        /*
-
 when (videos.value?.status){
     Resource.Status.SUCCESS -> {
         videos.value?.data?.let {
@@ -159,7 +114,6 @@ when (videos.value?.status){
     Resource.Status.RESET -> "TODO()"
     null -> ""
 }
-  */
     }
 }
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)

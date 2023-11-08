@@ -1,6 +1,8 @@
 package com.easyImage.mediapi.repository.video
 
-import kotlinx.coroutines.flow.Flow
+import com.easyImage.mediapi.model.VideoResponse
+import com.easyImage.mediapi.utils.WrapResponse
+import retrofit2.Response
 
 interface VideoDataOperation {
 

@@ -12,5 +12,5 @@ interface VideoService {
         @Query("key") key: String,
         @Query("q") query: String?,
         @Query("page") page: Int
-    ) : Response<WrapResponse<VideoResponse>>
+    ) : VideoResponse
 }

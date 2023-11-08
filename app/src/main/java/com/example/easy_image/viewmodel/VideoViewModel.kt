@@ -4,16 +4,20 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.easyImage.mediapi.model.VideoItemDTO
-import com.easyImage.mediapi.service.VideoService
+import com.easyImage.mediapi.repository.video.VideoRepository
+import com.easyImage.mediapi.utils.Resource
 import com.example.easy_image.utils.ignoreNull
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Inject
 
-class VideoViewModel : MainViewModel() {
+@HiltViewModel
+class VideoViewModel @Inject constructor(
+    private val videoRepository : VideoRepository
+) : MainViewModel() {
 
-    private val _videos = MutableLiveData<List<VideoItemDTO>?>()
-    val videos : LiveData<List<VideoItemDTO>?> get() = _videos
+    private val _videos = MutableLiveData<Resource<List<VideoItemDTO>?>>()
+    val videos : LiveData<Resource<List<VideoItemDTO>?>> get() = _videos
     private var currentImageRequestPage = 1
 
     fun getVideos(
@@ -31,34 +35,46 @@ class VideoViewModel : MainViewModel() {
             currentImageRequestPage = 1
         }
 
-        val videoService: VideoService = Retrofit.Builder()
-            .baseUrl("https://pixabay.com/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(VideoService::class.java)
-
         try {
             viewModelScope.launch {
-                val videos = videoService.getVideos(
+                val videos = videoRepository.getVideos(
+                    time = 0,
                     key = "39342921-c040c554a9e966b3202b73519",
-                    query = "train",
+                    query = query,
                     page = currentImageRequestPage
                 )
-                val videoList = videos?.hits?.filterIndexed { index, videoItem ->
-                    index != 0
-                }?.mapIndexed { index, videoItem ->
 
-                    VideoItemDTO(
-                        videoItem.id,
-                        videoItem.videos?.medium?.url ?: "",
-                        videoItem.videos?.large?.url ?: "",
-                        index == 0 && _videos.value == null,
-                        videoItem.tags ?: "",
-                    )
+                videos.collect{
+                    _videos.value = when(it.status){
+                        Resource.Status.SUCCESS -> {
+                            val videoItemDto = it.data?.hits?.filterIndexed { index, videoItem ->
+                                index != 0
+                            }?.mapIndexed { index, videoItem ->
+                                VideoItemDTO(
+                                    videoItem.id,
+                                    videoItem.videos?.medium?.url ?: "",
+                                    videoItem.videos?.large?.url ?: "",
+                                    index == 0 && _videos.value == null,
+                                    videoItem.tags ?: "",
+                                )
+                            }
+                            _videos.value?.data?.let {
+                                val newList = it +  videoItemDto
+                                Resource.success(newList)
+                            }?: run{
+                                Resource.success(videoItemDto)
+                            }
+
+                            currentImageRequestPage += 1
+
+                            Resource.success(videoItemDto)
+                        }
+                        Resource.Status.ERROR -> Resource.error("error", null)
+                        Resource.Status.LOADING -> Resource.loading(null)
+                        Resource.Status.RESET -> Resource.reset()
+                    }
                 }
 
-                _videos.value = videoList?.plus(_videos.value ?: listOf())
-                currentImageRequestPage += 1
             }
         }catch (e : Exception){
             println(e.cause)
@@ -66,9 +82,7 @@ class VideoViewModel : MainViewModel() {
     }
 
     fun videoMusicStatusChanged(videoId : Int){
-
-
-        val newVideoList = _videos.value?.map {
+        val newVideoList = _videos.value?.data?.map {
             val isMusicOpen: Boolean =
                 if (it.id == videoId)
                     it.isMusicOpen.not()
@@ -84,7 +98,6 @@ class VideoViewModel : MainViewModel() {
             )
         }
         _videos.value = null
-        _videos.value = newVideoList
-
+        _videos.value = Resource.Companion.success(newVideoList)
     }
 }
