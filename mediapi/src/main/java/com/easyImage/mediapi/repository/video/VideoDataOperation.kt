@@ -4,6 +4,10 @@ import kotlinx.coroutines.flow.Flow
 
 interface VideoDataOperation {
 
-    suspend fun getVideos() : Int
+    suspend fun getVideos(
+        key: String,
+        query: String?,
+        page: Int
+    ): Response<WrapResponse<VideoResponse>>?
 
 }

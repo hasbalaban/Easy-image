@@ -84,7 +84,7 @@ fun HomeScreen(
     coroutines: CoroutineScope,
     favoriteImages: SnapshotStateList<FavoriteDTO>,
     addOrRemoveFromFavoriteList: (FavoriteDTO) -> Boolean,
-    viewModel: HomeViewModel = viewModel()
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
 

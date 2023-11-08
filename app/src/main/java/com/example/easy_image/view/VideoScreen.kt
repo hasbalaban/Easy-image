@@ -30,11 +30,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.ui.PlayerView
 import androidx.media3.ui.PlayerView.SHOW_BUFFERING_ALWAYS
 import androidx.navigation.NavController
 import com.example.easy_image.R
 import com.easyImage.mediapi.model.VideoItemDTO
+import com.easyImage.mediapi.utils.Resource
 import com.example.easy_image.utils.ExoPlayerManager
 import com.example.easy_image.viewmodel.VideoViewModel
 
@@ -43,7 +45,7 @@ import com.example.easy_image.viewmodel.VideoViewModel
 fun VideoScreen(
     navController: NavController,
     openVideoDetail: (String) -> Unit,
-    viewModel: VideoViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    viewModel: VideoViewModel = hiltViewModel()
 ) {
     LaunchedEffect(Unit) {
         viewModel.getVideos()
@@ -60,6 +62,8 @@ fun VideoScreen(
       //  val screenHeightDp = configuration.screenHeightDp.dp
 
       //  val context = LocalContext.current
+
+
         videos.value?.let {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(it,
@@ -101,6 +105,61 @@ fun VideoScreen(
                 }
             }
         }
+
+
+        /*
+
+when (videos.value?.status){
+    Resource.Status.SUCCESS -> {
+        videos.value?.data?.let {
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                items(it,
+                    key = {
+                        it.id
+                    }
+                ) {
+
+                    Column(modifier = Modifier
+                        .padding(top = 20.dp)
+                        .fillMaxWidth()) {
+                        Box(modifier = Modifier
+                            .fillMaxSize()
+                            .height(230.dp),
+                            contentAlignment = Alignment.TopEnd
+                        ) {
+                            VideoItemScreen(it, openVideoDetail, viewModel)
+
+                            val imageIcon = if (it.isMusicOpen) R.drawable.music_on else R.drawable.music_off
+                            Image(
+                                modifier = Modifier
+                                    .clickable {
+                                        viewModel.videoMusicStatusChanged(it.id)
+                                    }
+                                    .padding(12.dp),
+                                painter = painterResource(id = imageIcon), contentDescription = "sound status" )
+
+                        }
+                        Text(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 8.dp, top = 2.dp),
+                            text = it.videoTag,
+                            color = Color.Black,
+                            fontSize = 14.sp,
+                            fontFamily = FontFamily.SansSerif
+                        )
+                    }
+
+                }
+            }
+        }
+    }
+    Resource.Status.ERROR -> "TODO()"
+    Resource.Status.LOADING -> "TODO()"
+    Resource.Status.RESET -> "TODO()"
+    null -> ""
+}
+  */
     }
 }
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
