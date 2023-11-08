@@ -93,7 +93,7 @@ class MainActivity : ComponentActivity() {
 
             composable(NavigationDirections.HomeScreen.route) {
 
-                //val viewModel = hiltViewModel<TestViewModel>()
+                //val viewModel = hiltViewModel<HomeViewModel>()
                 val coroutines : CoroutineScope = rememberCoroutineScope()
                 val openImageDetail = { imageUrl : String ->
                     navController.navigate(NavigationDirections.DetailScreen.createRoute(imageUrl = imageUrl))

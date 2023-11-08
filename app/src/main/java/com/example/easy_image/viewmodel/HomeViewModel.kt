@@ -18,13 +18,6 @@ class HomeViewModel @Inject constructor(
     private val videoRepository : VideoRepository
 ): MainViewModel() {
 
-    init {
-        viewModelScope.launch {
-            for (i in 0..20) {
-                println(videoRepository.getVideos(i.toLong()))
-            }
-        }
-    }
 
 
     private val _photos = MutableLiveData<List<ImageDTO>?>()
@@ -83,4 +76,50 @@ class HomeViewModel @Inject constructor(
             println(e.cause)
         }
     }
+
+    /*
+
+    fun getPhotos1(
+        query: String = "planet",
+        shouldClearPhotos : Boolean = false
+    ){
+        viewModelScope.launch {
+            try {
+                _photos.value = Resource.loading(null)
+                videoRepository.getVideos() .getSingleEvent(id).collect { resource ->
+
+                    when(resource.status){
+                        Resource.Status.SUCCESS ->{
+                            resource.data?.let {
+                                event = resource.data
+                                _eventResult.value = resource
+
+// to get event statistic
+                                if (event?.sportId != SportTypeEnum.TENNIS.sportId){
+                                    getStandingStatistic()
+                                    getTeamsLastStatistic()
+                                    getTeamsBetweenLastStatistic()
+                                    getTeamPlayers()
+                                    getMissingPlayersPlayers()
+                                }
+
+                            }?: run{
+                                _eventResult.value = Resource.errorModel(null)
+                            }
+                        }
+                        Resource.Status.ERROR -> {
+                            _eventResult.value = Resource.errorModel(resource.errorModel)
+                        }
+                        else -> {}
+                    }
+
+                }
+            } catch (ex: Exception) {
+                _eventResult.value = Resource.errorModel(ex.getServiceErrorModel())
+            }
+        }
+
+    }
+
+     */
 }

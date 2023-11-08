@@ -61,6 +61,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
@@ -71,7 +72,6 @@ import com.example.easy_image.utils.SaveImageToCacheAndShare
 import com.example.easy_image.viewmodel.HomeViewModel
 import com.easyImage.mediapi.model.FavoriteDTO
 import com.easyImage.mediapi.model.ImageDTO
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -84,7 +84,7 @@ fun HomeScreen(
     coroutines: CoroutineScope,
     favoriteImages: SnapshotStateList<FavoriteDTO>,
     addOrRemoveFromFavoriteList: (FavoriteDTO) -> Boolean,
-    viewModel: HomeViewModel = hiltViewModel<HomeViewModel>()
+    viewModel: HomeViewModel = viewModel()
 ) {
     val context = LocalContext.current
 
