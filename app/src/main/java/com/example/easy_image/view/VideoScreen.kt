@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import androidx.media3.ui.PlayerView.SHOW_BUFFERING_ALWAYS
 import androidx.navigation.NavController
@@ -39,6 +41,9 @@ import com.easyImage.mediapi.model.VideoItemDTO
 import com.easyImage.mediapi.utils.Resource
 import com.example.easy_image.utils.ExoPlayerManager
 import com.example.easy_image.viewmodel.VideoViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 
 
 @Composable
@@ -61,11 +66,16 @@ fun VideoScreen(
        // val configuration = LocalConfiguration.current
       //  val screenHeightDp = configuration.screenHeightDp.dp
 
-      //  val context = LocalContext.current
+
 
 
 when (videos.value?.status){
     Resource.Status.SUCCESS -> {
+        val context = LocalContext.current
+
+
+
+
         videos.value?.data?.let {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(it,
@@ -73,6 +83,13 @@ when (videos.value?.status){
                         it.id
                     }
                 ) {
+
+
+                    val exoPlayer by remember {
+                        mutableStateOf(
+                            ExoPlayerManager.initializePlayer(context)
+                        )
+                    }
 
                     Column(modifier = Modifier
                         .padding(top = 20.dp)
@@ -82,7 +99,7 @@ when (videos.value?.status){
                             .height(230.dp),
                             contentAlignment = Alignment.TopEnd
                         ) {
-                            VideoItemScreen(it, openVideoDetail, viewModel)
+                            VideoItemScreen(it, openVideoDetail, viewModel, exoPlayer = exoPlayer)
 
                             val imageIcon = if (it.isMusicOpen) R.drawable.music_on else R.drawable.music_off
                             Image(
@@ -94,6 +111,33 @@ when (videos.value?.status){
                                 painter = painterResource(id = imageIcon), contentDescription = "sound status" )
 
                         }
+
+
+                        var fraction by remember { mutableStateOf(1.0f) }
+
+
+                        LaunchedEffect(Unit){
+                            while (true){
+                                withContext(Dispatchers.IO){
+                                    delay(400)
+                                    withContext(Dispatchers.Main){
+                                        val duration = (exoPlayer.duration / 1000).toFloat()
+                                        val currentPosition = (exoPlayer.currentPosition / 1000).toFloat()
+                                        val percent = (currentPosition / duration)
+
+                                        if (percent > 0f) {
+                                            fraction = percent
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        CustomSeekBar(fraction = fraction) {
+                            val newValue = exoPlayer.duration * it
+                            exoPlayer.seekTo(newValue.toLong())
+                        }
+
                         Text(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -121,17 +165,13 @@ when (videos.value?.status){
 fun VideoItemScreen(
     videoItemDTO: VideoItemDTO,
     openVideoDetail: (String) -> Unit,
-    viewModel: VideoViewModel
+    viewModel: VideoViewModel,
+    exoPlayer: ExoPlayer
 ) {
     val context = LocalContext.current
 
 
 
-    val exoPlayer by remember {
-        mutableStateOf(
-            ExoPlayerManager.initializePlayer(context)
-        )
-    }
 
     DisposableEffect(AndroidView(modifier = Modifier
         .pointerInput(Unit) {
