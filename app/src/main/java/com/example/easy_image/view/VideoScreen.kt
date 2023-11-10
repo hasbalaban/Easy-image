@@ -1,5 +1,11 @@
 package com.example.easy_image.view
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -10,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
@@ -84,6 +91,7 @@ when (videos.value?.status){
                     }
                 ) {
 
+                    var fraction by remember { mutableStateOf(1.0f) }
 
                     val exoPlayer by remember {
                         mutableStateOf(
@@ -91,54 +99,74 @@ when (videos.value?.status){
                         )
                     }
 
-                    Column(modifier = Modifier
-                        .padding(top = 20.dp)
-                        .fillMaxWidth()) {
-                        Box(modifier = Modifier
-                            .fillMaxSize()
-                            .height(230.dp),
-                            contentAlignment = Alignment.TopEnd
-                        ) {
-                            VideoItemScreen(it, openVideoDetail, viewModel, exoPlayer = exoPlayer)
+                    LaunchedEffect(Unit){
+                        while (true){
+                            withContext(Dispatchers.IO){
+                                delay(400)
+                                withContext(Dispatchers.Main){
+                                    val duration = (exoPlayer.duration / 1000).toFloat()
+                                    val currentPosition = (exoPlayer.currentPosition / 1000).toFloat()
+                                    val percent = (currentPosition / duration)
 
-                            val imageIcon = if (it.isMusicOpen) R.drawable.music_on else R.drawable.music_off
-                            Image(
-                                modifier = Modifier
-                                    .clickable {
-                                        viewModel.videoMusicStatusChanged(it.id)
-                                    }
-                                    .padding(12.dp),
-                                painter = painterResource(id = imageIcon), contentDescription = "sound status" )
-
-                        }
-
-
-                        var fraction by remember { mutableStateOf(1.0f) }
-
-
-                        LaunchedEffect(Unit){
-                            while (true){
-                                withContext(Dispatchers.IO){
-                                    delay(400)
-                                    withContext(Dispatchers.Main){
-                                        val duration = (exoPlayer.duration / 1000).toFloat()
-                                        val currentPosition = (exoPlayer.currentPosition / 1000).toFloat()
-                                        val percent = (currentPosition / duration)
-
-                                        if (percent > 0f) {
-                                            fraction = percent
-                                        }
+                                    if (percent > 0f) {
+                                        fraction = percent
                                     }
                                 }
                             }
                         }
+                    }
 
-                        if (it.isMusicOpen){
-                            CustomSeekBar(fraction = fraction) {
-                                val newValue = exoPlayer.duration * it
-                                exoPlayer.seekTo(newValue.toLong())
+
+                    Column(modifier = Modifier
+                        .padding(top = 20.dp)
+                        .fillMaxWidth()) {
+
+                        Box (modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.BottomEnd){
+                            Box(modifier = Modifier
+                                .fillMaxSize()
+                                .height(230.dp),
+                                contentAlignment = Alignment.TopEnd
+                            ) {
+                                VideoItemScreen(it, openVideoDetail, viewModel, exoPlayer = exoPlayer)
+
+                                val imageIcon = if (it.isMusicOpen) R.drawable.music_on else R.drawable.music_off
+                                Image(
+                                    modifier = Modifier
+                                        .clickable {
+                                            viewModel.videoMusicStatusChanged(it.id)
+                                        }
+                                        .padding(12.dp),
+                                    painter = painterResource(id = imageIcon), contentDescription = "sound status" )
+
                             }
+
+                            Column(
+                                Modifier
+                                    .animateContentSize()
+                                    .then(
+                                        if (it.isMusicOpen) Modifier.wrapContentSize() else Modifier.height(
+                                            0.dp
+                                        )
+                                    )) {
+
+                                CustomSeekBar(fraction = fraction) {
+                                    val newValue = exoPlayer.duration * it
+                                    exoPlayer.seekTo(newValue.toLong())
+                                }
+                            }
+
                         }
+
+
+
+
+
+
+
+
+
+
+
 
 
                         Text(
