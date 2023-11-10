@@ -100,7 +100,7 @@ when (videos.value?.status){
                     }
 
                     LaunchedEffect(Unit){
-                        while (true){
+                        while (it.isMusicOpen){
                             withContext(Dispatchers.IO){
                                 delay(400)
                                 withContext(Dispatchers.Main){
