@@ -193,11 +193,13 @@ class MainActivity : ComponentActivity() {
                 DisposableEffect(LocalLifecycleOwner.current) {
 
                     val observer = LifecycleEventObserver { _, event ->
-                        activity.requestedOrientation = when (event){
-                            Lifecycle.Event.ON_RESUME ->  {
-                                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                            }
-                            else -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                        if (event == Lifecycle.Event.ON_CREATE){
+                            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                            return@LifecycleEventObserver
+                        }
+                        if (event == Lifecycle.Event.ON_STOP){
+                            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                            return@LifecycleEventObserver
                         }
                     }
                     lifeCycleOwner.lifecycle.addObserver(observer)
