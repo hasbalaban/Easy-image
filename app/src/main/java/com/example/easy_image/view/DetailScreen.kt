@@ -61,6 +61,9 @@ import com.example.easy_image.R
 import com.example.easy_image.utils.ExoPlayerManager
 import com.example.easy_image.utils.SaveImageToCacheAndShare
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import java.io.OutputStream
 import java.text.SimpleDateFormat
 
@@ -247,8 +250,25 @@ private fun VideoDetailScreen(videoUrl: String) {
     val context = LocalContext.current
 
     val exoPlayer by remember { mutableStateOf(ExoPlayerManager.createNewPlayer(context)) }
-    var fraction by remember { mutableStateOf(0.5f) }
+    var fraction by remember { mutableStateOf(1.0f) }
 
+
+    LaunchedEffect(Unit){
+        while (true){
+            withContext(Dispatchers.IO){
+                delay(400)
+                withContext(Dispatchers.Main){
+                    val duration = (exoPlayer.duration / 1000).toFloat()
+                    val currentPosition = (exoPlayer.currentPosition / 1000).toFloat()
+                    val percent = (currentPosition / duration)
+
+                    if (percent > 0f) {
+                        fraction = percent
+                    }
+                }
+            }
+        }
+    }
 
     Box(contentAlignment = Alignment.BottomStart) {
         DisposableEffect(AndroidView(modifier = Modifier
@@ -258,27 +278,6 @@ private fun VideoDetailScreen(videoUrl: String) {
                 player = exoPlayer.apply {
                     setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
                     useController = false
-
-                    addListener(object  : Player.Listener{
-
-                        override fun onPositionDiscontinuity(
-                            oldPosition: Player.PositionInfo,
-                            newPosition: Player.PositionInfo,
-                            reason: Int
-                        ) {
-                            super.onPositionDiscontinuity(oldPosition, newPosition, reason)
-                            val duration = (exoPlayer.duration / 1000).toDouble()
-                            val currentPosition = (exoPlayer.currentPosition / 1000) .toDouble()
-                            val percent = (currentPosition / duration)
-
-                            if (percent > 0f && percent != fraction.toDouble() ) {
-                                fraction = percent.toFloat()
-                            }
-                        }
-
-
-                    })
-
                 }
             }
         }
@@ -314,7 +313,10 @@ private fun Duration(fraction : Float){
         .background(Color.Black)
         .padding(vertical = 2.dp, horizontal = 4.dp)) {
 
-        Spacer(modifier = Modifier.background(Color.White).fillMaxHeight().fillMaxWidth(fraction))
+        Spacer(modifier = Modifier
+            .background(Color.White)
+            .fillMaxHeight()
+            .fillMaxWidth(fraction))
 
     }
 }
