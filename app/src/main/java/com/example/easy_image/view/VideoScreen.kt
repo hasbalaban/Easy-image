@@ -133,10 +133,13 @@ when (videos.value?.status){
                             }
                         }
 
-                        CustomSeekBar(fraction = fraction) {
-                            val newValue = exoPlayer.duration * it
-                            exoPlayer.seekTo(newValue.toLong())
+                        if (it.isMusicOpen){
+                            CustomSeekBar(fraction = fraction) {
+                                val newValue = exoPlayer.duration * it
+                                exoPlayer.seekTo(newValue.toLong())
+                            }
                         }
+
 
                         Text(
                             modifier = Modifier
