@@ -99,19 +99,15 @@ when (videos.value?.status){
                         )
                     }
 
-                    LaunchedEffect(Unit){
-                        while (it.isMusicOpen){
-                            withContext(Dispatchers.IO){
-                                delay(400)
-                                withContext(Dispatchers.Main){
-                                    val duration = (exoPlayer.duration / 1000).toFloat()
-                                    val currentPosition = (exoPlayer.currentPosition / 1000).toFloat()
-                                    val percent = (currentPosition / duration)
+                    LaunchedEffect(Unit) {
+                        while (it.isMusicOpen) {
+                            delay(400)
+                            val duration = (exoPlayer.duration / 1000).toFloat()
+                            val currentPosition = (exoPlayer.currentPosition / 1000).toFloat()
+                            val percent = (currentPosition / duration)
 
-                                    if (percent > 0f) {
-                                        fraction = percent
-                                    }
-                                }
+                            if (percent > 0f) {
+                                fraction = percent
                             }
                         }
                     }
