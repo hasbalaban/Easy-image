@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Slider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -287,7 +288,13 @@ private fun VideoDetailScreen(videoUrl: String) {
             }
         }
 
-        Duration(fraction = fraction)
+
+        CustomSeekBar(fraction = fraction) {
+            val newValue = exoPlayer.duration * it
+            exoPlayer.seekTo(newValue.toLong())
+        }
+
+        //Duration(fraction = fraction)
     }
 
 
@@ -319,6 +326,15 @@ private fun Duration(fraction : Float){
             .fillMaxWidth(fraction))
 
     }
+}
+
+@Composable
+fun CustomSeekBar(
+    fraction: Float,
+    onValueChange: (Float) -> Unit
+) {
+
+        Slider(value = fraction , onValueChange = onValueChange )
 }
 
 
