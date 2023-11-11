@@ -84,7 +84,7 @@ when (videos.value?.status){
                     }
                 ) {
 
-                    var fraction by remember { mutableStateOf(1.0f) }
+                    var fraction by remember { mutableStateOf(0.0f) }
 
                     val exoPlayer by remember {
                         val url = it.videoUrl.ifEmpty { it.videoPreviewUrl }
@@ -158,8 +158,7 @@ when (videos.value?.status){
 
                                 VideoTimeLineBar(fraction = fraction, Modifier
                                     .fillMaxWidth()
-                                    .height(3.dp)
-                                    .padding(end = 6.dp)) {
+                                    .height(3.dp)) {
                                     val newValue = exoPlayer.duration * it
                                     exoPlayer.seekTo(newValue.toLong())
                                 }

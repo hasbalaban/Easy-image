@@ -255,7 +255,7 @@ private fun VideoDetailScreen(videoUrl: String) {
     val context = LocalContext.current
 
     val exoPlayer by remember { mutableStateOf(ExoPlayerManager.createNewPlayer(context, videoUrl)) }
-    var fraction by remember { mutableStateOf(1.0f) }
+    var fraction by remember { mutableStateOf(0.0f) }
 
 
     LaunchedEffect(Unit){
@@ -352,7 +352,7 @@ private fun PreviewDetailScreen() {
         contentAlignment = Alignment.BottomStart
     ) {
 
-        VideoTimeLineBar(0.5f,Modifier
+        VideoTimeLineBar(0.1f,Modifier
             .fillMaxWidth()
             .height(1.dp)
             .padding(end = 6.dp)){
