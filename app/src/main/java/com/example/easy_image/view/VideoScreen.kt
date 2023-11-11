@@ -1,11 +1,6 @@
 package com.example.easy_image.view
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -48,11 +43,9 @@ import com.easyImage.mediapi.model.VideoItemDTO
 import com.easyImage.mediapi.utils.Resource
 import com.example.easy_image.utils.ExoPlayerManager
 import com.example.easy_image.viewmodel.VideoViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
 
-
+@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 @Composable
 fun VideoScreen(
     navController: NavController,
@@ -94,14 +87,17 @@ when (videos.value?.status){
                     var fraction by remember { mutableStateOf(1.0f) }
 
                     val exoPlayer by remember {
+                        val url = it.videoUrl.ifEmpty { it.videoPreviewUrl }
                         mutableStateOf(
-                            ExoPlayerManager.initializePlayer(context)
+                            ExoPlayerManager.initializePlayer(context, url)
                         )
                     }
 
+
                     LaunchedEffect(Unit) {
                         while (it.isMusicOpen) {
-                            delay(400)
+                            delay(800)
+                            if (!exoPlayer.isPlaying) continue
                             val duration = (exoPlayer.duration / 1000).toFloat()
                             val currentPosition = (exoPlayer.currentPosition / 1000).toFloat()
                             val percent = (currentPosition / duration)
@@ -109,6 +105,16 @@ when (videos.value?.status){
                             if (percent > 0f) {
                                 fraction = percent
                             }
+                        }
+                    }
+
+                    LaunchedEffect(it.isMusicOpen){
+                        exoPlayer.volume = if (it.isMusicOpen) 1f else 0f
+                        if (it.isMusicOpen){
+                            exoPlayer.prepare()
+                            exoPlayer.play()
+                        }else {
+                            exoPlayer.pause()
                         }
                     }
 
@@ -153,18 +159,6 @@ when (videos.value?.status){
 
                         }
 
-
-
-
-
-
-
-
-
-
-
-
-
                         Text(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -197,9 +191,6 @@ fun VideoItemScreen(
 ) {
     val context = LocalContext.current
 
-
-
-
     DisposableEffect(AndroidView(modifier = Modifier
         .pointerInput(Unit) {
             detectTapGestures(
@@ -225,18 +216,6 @@ fun VideoItemScreen(
     )) {
         onDispose {
             ExoPlayerManager.releasePlayer(exoPlayer = exoPlayer)
-        }
-    }
-
-    LaunchedEffect(videoItemDTO.isMusicOpen){
-        exoPlayer.volume = if (videoItemDTO.isMusicOpen) 1f else 0f
-        if (videoItemDTO.isMusicOpen){
-            ExoPlayerManager.setMediaItem(
-                exoPlayer = exoPlayer,
-                videoUri = videoItemDTO.videoPreviewUrl,
-            )
-        }else {
-            exoPlayer.stop()
         }
     }
 

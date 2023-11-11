@@ -250,7 +250,7 @@ fun DetailScreen(dataUrl: String, isImage: Boolean = true, popBackStack: () -> U
 private fun VideoDetailScreen(videoUrl: String) {
     val context = LocalContext.current
 
-    val exoPlayer by remember { mutableStateOf(ExoPlayerManager.createNewPlayer(context)) }
+    val exoPlayer by remember { mutableStateOf(ExoPlayerManager.createNewPlayer(context, videoUrl)) }
     var fraction by remember { mutableStateOf(1.0f) }
 
 
