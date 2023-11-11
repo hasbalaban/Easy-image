@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.provider.Settings
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,6 +28,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
@@ -272,7 +275,7 @@ private fun VideoDetailScreen(videoUrl: String) {
         }
     }
 
-    Box(contentAlignment = Alignment.BottomStart) {
+    Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier.fillMaxSize()) {
         DisposableEffect(AndroidView(modifier = Modifier
             .fillMaxSize(), factory = {
             PlayerView(context).apply {
@@ -291,17 +294,20 @@ private fun VideoDetailScreen(videoUrl: String) {
 
 
         Box(
-            Modifier.height(3.dp).fillMaxWidth().padding(bottom = 4.dp),
+            Modifier.fillMaxWidth()
+                .padding(bottom = 4.dp)
+                .animateContentSize()
+                .wrapContentSize(),
             contentAlignment = Alignment.BottomStart
         ) {
 
-            VideoTimeLineBar(fraction = fraction) {
+            VideoTimeLineBar(fraction = fraction, Modifier
+                .height(2.dp)
+                .fillMaxWidth()) {
                 val newValue = exoPlayer.duration * it
                 exoPlayer.seekTo(newValue.toLong())
             }
         }
-
-        //Duration(fraction = fraction)
     }
 
 
@@ -319,33 +325,14 @@ private fun VideoDetailScreen(videoUrl: String) {
 }
 
 @Composable
-private fun Duration(fraction : Float){
-
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .height(6.dp)
-        .background(Color.Black)
-        .padding(vertical = 2.dp, horizontal = 4.dp)) {
-
-        Spacer(modifier = Modifier
-            .background(Color.White)
-            .fillMaxHeight()
-            .fillMaxWidth(fraction))
-
-    }
-}
-
-@Composable
 fun VideoTimeLineBar(
     fraction: Float,
-    onValueChange: (Float) -> Unit
+    modifier: Modifier,
+    onValueChange: (Float) -> Unit,
 ) {
 
     Slider(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(3.dp)
-            .padding(end = 6.dp),
+        modifier = modifier,
         value = fraction,
         onValueChange = onValueChange,
         colors = SliderDefaults.colors(
@@ -365,7 +352,10 @@ private fun PreviewDetailScreen() {
         contentAlignment = Alignment.BottomStart
     ) {
 
-        VideoTimeLineBar(0.5f){
+        VideoTimeLineBar(0.5f,Modifier
+            .fillMaxWidth()
+            .height(1.dp)
+            .padding(end = 6.dp)){
 
         }
     }
