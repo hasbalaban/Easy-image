@@ -195,6 +195,8 @@ fun VideoItemScreen(
         .pointerInput(Unit) {
             detectTapGestures(
                 onDoubleTap = {
+                    val url = videoItemDTO.videoUrl.ifEmpty { videoItemDTO.videoPreviewUrl }
+
                     openVideoDetail(videoItemDTO.videoUrl)
                 },
                 onTap = {
