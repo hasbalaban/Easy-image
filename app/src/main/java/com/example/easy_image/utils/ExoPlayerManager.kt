@@ -20,19 +20,20 @@ import java.io.File
 object ExoPlayerManager {
     private val players: MutableList<ExoPlayer> = mutableListOf()
 
-    fun initializePlayer(context: Context): ExoPlayer {
+    fun initializePlayer(context: Context , videoUri: String): ExoPlayer {
         CacheManager.initialize(context)
         val player = players.firstOrNull { it.playbackState == Player.STATE_IDLE }
-            ?: createNewPlayer(context)
+            ?: createNewPlayer(context, videoUri = videoUri)
         players.remove(player)
         return player
     }
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-    fun createNewPlayer(context: Context): ExoPlayer {
+    fun createNewPlayer(context: Context, videoUri: String): ExoPlayer {
         val player = ExoPlayer.Builder(context).build()
         player.setHandleAudioBecomingNoisy(true)
         player.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
+        setMediaItem(player, videoUri)
         return player
     }
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
@@ -53,8 +54,6 @@ object ExoPlayerManager {
         exoPlayer.setMediaSource(mediaSource)
         exoPlayer.repeatMode = Player.REPEAT_MODE_ONE
         exoPlayer.playWhenReady = true
-        exoPlayer.prepare()
-        exoPlayer.play()
     }
 
     fun releasePlayer(exoPlayer: ExoPlayer) {
