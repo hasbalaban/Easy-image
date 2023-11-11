@@ -156,7 +156,7 @@ when (videos.value?.status){
                                         if (it.isVideoPlaying) modifier.wrapContentSize() else modifier.height(0.dp)
                                     )) {
 
-                                CustomSeekBar(fraction = fraction) {
+                                VideoTimeLineBar(fraction = fraction) {
                                     val newValue = exoPlayer.duration * it
                                     exoPlayer.seekTo(newValue.toLong())
                                 }

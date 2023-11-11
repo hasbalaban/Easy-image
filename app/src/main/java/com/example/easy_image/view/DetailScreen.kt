@@ -27,8 +27,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
@@ -291,10 +289,18 @@ private fun VideoDetailScreen(videoUrl: String) {
             }
         }
 
+        val modifier = Modifier
 
-        CustomSeekBar(fraction = fraction) {
-            val newValue = exoPlayer.duration * it
-            exoPlayer.seekTo(newValue.toLong())
+
+        Box(
+            modifier.height(3.dp).fillMaxWidth().padding(bottom = 4.dp),
+            contentAlignment = Alignment.BottomStart
+        ) {
+
+            VideoTimeLineBar(fraction = fraction) {
+                val newValue = exoPlayer.duration * it
+                exoPlayer.seekTo(newValue.toLong())
+            }
         }
 
         //Duration(fraction = fraction)
@@ -332,13 +338,16 @@ private fun Duration(fraction : Float){
 }
 
 @Composable
-fun CustomSeekBar(
+fun VideoTimeLineBar(
     fraction: Float,
     onValueChange: (Float) -> Unit
 ) {
 
     Slider(
-        modifier = Modifier.fillMaxWidth().height(2.dp).padding(end = 6.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(3.dp)
+            .padding(end = 6.dp),
         value = fraction,
         onValueChange = onValueChange,
         colors = SliderDefaults.colors(
@@ -353,7 +362,14 @@ fun CustomSeekBar(
 @Preview
 @Composable
 private fun PreviewDetailScreen() {
-    CustomSeekBar(0.5f){
+    Box(
+        Modifier.height(2.dp).fillMaxWidth().padding(bottom = 4.dp),
+        contentAlignment = Alignment.BottomStart
+    ) {
 
+        VideoTimeLineBar(0.5f){
+
+        }
     }
+
 }
