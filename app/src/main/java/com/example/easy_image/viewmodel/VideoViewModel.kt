@@ -97,7 +97,7 @@ class VideoViewModel @Inject constructor(
                 it.videoTag,
             )
         }
-        _videos.value = null
+        //_videos.value = null
         _videos.value = Resource.Companion.success(newVideoList)
     }
 }
