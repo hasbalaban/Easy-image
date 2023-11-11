@@ -95,7 +95,7 @@ when (videos.value?.status){
 
 
                     LaunchedEffect(Unit) {
-                        while (it.isMusicOpen) {
+                        while (it.isVideoPlaying) {
                             delay(800)
                             if (!exoPlayer.isPlaying) continue
                             val duration = (exoPlayer.duration / 1000).toFloat()
@@ -108,14 +108,18 @@ when (videos.value?.status){
                         }
                     }
 
-                    LaunchedEffect(it.isMusicOpen){
+                    LaunchedEffect(it.isVideoPlaying){
                         exoPlayer.volume = if (it.isMusicOpen) 1f else 0f
-                        if (it.isMusicOpen){
+                        if (it.isVideoPlaying){
                             exoPlayer.prepare()
                             exoPlayer.play()
                         }else {
                             exoPlayer.pause()
                         }
+                    }
+
+                    LaunchedEffect(it.isMusicOpen){
+                        exoPlayer.volume = if (it.isMusicOpen) 1f else 0f
                     }
 
 
@@ -149,7 +153,7 @@ when (videos.value?.status){
                                     .padding(bottom = 4.dp)
                                     .animateContentSize()
                                     .then(
-                                        if (it.isMusicOpen) modifier.wrapContentSize() else modifier.height(0.dp)
+                                        if (it.isVideoPlaying) modifier.wrapContentSize() else modifier.height(0.dp)
                                     )) {
 
                                 CustomSeekBar(fraction = fraction) {
@@ -201,7 +205,7 @@ fun VideoItemScreen(
                     openVideoDetail(url)
                 },
                 onTap = {
-                    viewModel.videoMusicStatusChanged(videoItemDTO.id)
+                    viewModel.videoVideoPlayingStatusChanged(videoItemDTO.id)
                 }
             )
 
@@ -223,7 +227,7 @@ fun VideoItemScreen(
     }
 
 
-    if (videoItemDTO.isMusicOpen.not()) {
+    if (videoItemDTO.isVideoPlaying.not()) {
         Image(
             modifier = Modifier
                 .fillMaxWidth()

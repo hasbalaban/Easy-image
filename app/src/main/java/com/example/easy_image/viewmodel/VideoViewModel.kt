@@ -50,12 +50,14 @@ class VideoViewModel @Inject constructor(
                             val videoItemDto = it.data?.hits?.filterIndexed { index, videoItem ->
                                 index != 0
                             }?.mapIndexed { index, videoItem ->
+
                                 VideoItemDTO(
-                                    videoItem.id,
-                                    videoItem.videos?.medium?.url ?: "",
-                                    videoItem.videos?.large?.url ?: "",
-                                    index == 0 && _videos.value == null,
-                                    videoItem.tags ?: "",
+                                    id = videoItem.id,
+                                    videoPreviewUrl = videoItem.videos?.medium?.url ?: "",
+                                    videoUrl = videoItem.videos?.large?.url ?: "",
+                                    isVideoPlaying = index == 0 && _videos.value == null,
+                                    isMusicOpen = index == 0 && _videos.value == null,
+                                    videoTag =videoItem.tags ?: ""
                                 )
                             }
                             _videos.value?.data?.let {
@@ -90,11 +92,32 @@ class VideoViewModel @Inject constructor(
                     false
 
             VideoItemDTO(
-                it.id.ignoreNull(),
-                it.videoPreviewUrl,
-                it.videoUrl,
-                isMusicOpen,
-                it.videoTag,
+                id = it.id.ignoreNull(),
+                videoPreviewUrl = it.videoPreviewUrl,
+                videoUrl = it.videoUrl,
+                isVideoPlaying = it.isVideoPlaying,
+                isMusicOpen = isMusicOpen,
+                videoTag = it.videoTag,
+            )
+        }
+        //_videos.value = null
+        _videos.value = Resource.Companion.success(newVideoList)
+    }
+    fun videoVideoPlayingStatusChanged(videoId : Int){
+        val newVideoList = _videos.value?.data?.map {
+            val isVideoPlaying: Boolean =
+                if (it.id == videoId)
+                    it.isVideoPlaying.not()
+                else
+                    false
+
+            VideoItemDTO(
+                id = it.id.ignoreNull(),
+                videoPreviewUrl = it.videoPreviewUrl,
+                videoUrl = it.videoUrl,
+                isVideoPlaying = isVideoPlaying,
+                isMusicOpen = it.isMusicOpen,
+                videoTag = it.videoTag,
             )
         }
         //_videos.value = null
