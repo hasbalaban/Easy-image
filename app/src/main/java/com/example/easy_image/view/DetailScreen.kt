@@ -289,11 +289,9 @@ private fun VideoDetailScreen(videoUrl: String) {
             }
         }
 
-        val modifier = Modifier
-
 
         Box(
-            modifier.height(3.dp).fillMaxWidth().padding(bottom = 4.dp),
+            Modifier.height(3.dp).fillMaxWidth().padding(bottom = 4.dp),
             contentAlignment = Alignment.BottomStart
         ) {
 
