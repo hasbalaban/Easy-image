@@ -27,7 +27,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -334,12 +337,23 @@ fun CustomSeekBar(
     onValueChange: (Float) -> Unit
 ) {
 
-        Slider(value = fraction , onValueChange = onValueChange )
+    Slider(
+        modifier = Modifier.fillMaxWidth().height(2.dp).padding(end = 6.dp),
+        value = fraction,
+        onValueChange = onValueChange,
+        colors = SliderDefaults.colors(
+            thumbColor = Color.White,
+            activeTrackColor = Color.White,
+            inactiveTrackColor = Color.DarkGray,
+        )
+    )
 }
 
 
 @Preview
 @Composable
 private fun PreviewDetailScreen() {
-    SearchScreen()
+    CustomSeekBar(0.5f){
+
+    }
 }

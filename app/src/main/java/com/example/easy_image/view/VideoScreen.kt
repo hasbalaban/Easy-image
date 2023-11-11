@@ -141,14 +141,15 @@ when (videos.value?.status){
                                     painter = painterResource(id = imageIcon), contentDescription = "sound status" )
 
                             }
+                            val modifier = Modifier
 
                             Column(
-                                Modifier
+                                modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 4.dp)
                                     .animateContentSize()
                                     .then(
-                                        if (it.isMusicOpen) Modifier.wrapContentSize() else Modifier.height(
-                                            0.dp
-                                        )
+                                        if (it.isMusicOpen) modifier.wrapContentSize() else modifier.height(0.dp)
                                     )) {
 
                                 CustomSeekBar(fraction = fraction) {
@@ -197,7 +198,7 @@ fun VideoItemScreen(
                 onDoubleTap = {
                     val url = videoItemDTO.videoUrl.ifEmpty { videoItemDTO.videoPreviewUrl }
 
-                    openVideoDetail(videoItemDTO.videoUrl)
+                    openVideoDetail(url)
                 },
                 onTap = {
                     viewModel.videoMusicStatusChanged(videoItemDTO.id)
