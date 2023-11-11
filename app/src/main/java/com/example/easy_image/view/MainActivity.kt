@@ -88,7 +88,7 @@ class MainActivity : ComponentActivity() {
 
         NavHost(
             modifier = Modifier.padding(paddingValues),
-            navController = navController, startDestination = NavigationDirections.HomeScreen.route ) {
+            navController = navController, startDestination = NavigationDirections.Video.route ) {
 
 
             composable(NavigationDirections.HomeScreen.route) {
@@ -273,25 +273,6 @@ class MainActivity : ComponentActivity() {
             )
 
         }
-    }
-
-    // test cpp and kotlin
-    fun yNativeFunction(a: Int, b: Int): Int {
-        for (i in 0..100000) {
-            if (i == 999) {
-                return i
-            }
-        }
-        return 0
-    }
-    private fun testcpp(){
-        myNativeFunction(1,2)
-        val time = measureTimeMillis {
-            for (i in 0..1){
-                myNativeFunction(1,1)
-            }
-        }
-        println(time)
     }
 
 
