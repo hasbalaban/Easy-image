@@ -94,7 +94,16 @@ when (videos.value?.status){
                     }
 
 
-                    LaunchedEffect(Unit) {
+                    LaunchedEffect(it.isVideoPlaying){
+                        exoPlayer.volume = if (it.isMusicOpen) 1f else 0f
+                        if (it.isVideoPlaying){
+                            exoPlayer.prepare()
+                            exoPlayer.play()
+                        }else {
+                            exoPlayer.pause()
+                        }
+
+
                         while (it.isVideoPlaying) {
                             delay(800)
                             if (!exoPlayer.isPlaying) continue
@@ -105,16 +114,6 @@ when (videos.value?.status){
                             if (percent > 0f) {
                                 fraction = percent
                             }
-                        }
-                    }
-
-                    LaunchedEffect(it.isVideoPlaying){
-                        exoPlayer.volume = if (it.isMusicOpen) 1f else 0f
-                        if (it.isVideoPlaying){
-                            exoPlayer.prepare()
-                            exoPlayer.play()
-                        }else {
-                            exoPlayer.pause()
                         }
                     }
 
