@@ -123,4 +123,26 @@ class VideoViewModel @Inject constructor(
         //_videos.value = null
         _videos.value = Resource.Companion.success(newVideoList)
     }
+    fun videoAutoPlayingStatusChanged(videoId : Int){
+        if (_videos.value?.data?.firstOrNull { it.id == videoId }?.isVideoPlaying == true) return
+
+        val newVideoList = _videos.value?.data?.map {
+            val isVideoPlaying: Boolean =
+                if (it.id == videoId)
+                    true
+                else
+                    false
+
+            VideoItemDTO(
+                id = it.id.ignoreNull(),
+                videoPreviewUrl = it.videoPreviewUrl,
+                videoUrl = it.videoUrl,
+                isVideoPlaying = isVideoPlaying,
+                isMusicOpen = it.isMusicOpen,
+                videoTag = it.videoTag,
+            )
+        }
+        //_videos.value = null
+        _videos.value = Resource.Companion.success(newVideoList)
+    }
 }

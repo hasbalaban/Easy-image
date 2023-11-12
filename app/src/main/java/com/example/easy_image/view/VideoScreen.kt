@@ -13,11 +13,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -57,6 +59,7 @@ fun VideoScreen(
     }
 
     val videos = viewModel.videos.observeAsState()
+    val listState = remember { LazyListState() }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -67,17 +70,27 @@ fun VideoScreen(
       //  val screenHeightDp = configuration.screenHeightDp.dp
 
 
-
-
 when (videos.value?.status){
     Resource.Status.SUCCESS -> {
         val context = LocalContext.current
 
 
 
-
         videos.value?.data?.let {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
+            val firstItemOffset = remember { derivedStateOf { listState.layoutInfo } }
+
+            firstItemOffset.value.visibleItemsInfo.firstOrNull()?.offset?.let { offset ->
+                val playingVideoITem =
+                    if (offset < 0) it[listState.layoutInfo.visibleItemsInfo.first().index + 1]
+                    else it[listState.layoutInfo.visibleItemsInfo.first().index]
+
+                viewModel.videoAutoPlayingStatusChanged(playingVideoITem.id)
+            }
+
+
+            LazyColumn(modifier = Modifier.fillMaxSize(),
+                state = listState
+                ) {
                 items(it,
                     key = {
                         it.id
@@ -152,7 +165,9 @@ when (videos.value?.status){
                                     .padding(bottom = 4.dp)
                                     .animateContentSize()
                                     .then(
-                                        if (it.isVideoPlaying) modifier.wrapContentSize() else modifier.height(0.dp)
+                                        if (it.isVideoPlaying) modifier.wrapContentSize() else modifier.height(
+                                            0.dp
+                                        )
                                     )) {
 
                                 VideoTimeLineBar(fraction = fraction, Modifier
