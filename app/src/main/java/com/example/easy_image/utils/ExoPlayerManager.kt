@@ -22,7 +22,10 @@ object ExoPlayerManager {
 
     fun initializePlayer(context: Context , videoUri: String): ExoPlayer {
         CacheManager.initialize(context)
-        val player = players.firstOrNull { it.playbackState == Player.STATE_IDLE }
+        val player = players.firstOrNull { it.playbackState == Player.STATE_IDLE }?.also {
+            it.setHandleAudioBecomingNoisy(true)
+            setMediaItem(it, videoUri)
+        }
             ?: createNewPlayer(context, videoUri = videoUri)
         players.remove(player)
         return player
@@ -78,7 +81,7 @@ object CacheManager {
         if (!::cache.isInitialized) {
             clearApplicationData(context)
             val cacheDirectory = File(context.cacheDir, "ExoplayerCache")
-            val maxCacheSize = 200 * 1024 * 1024 // 200 MB cache size
+            val maxCacheSize = 400 * 1024 * 1024 // 200 MB cache size
             val evictor = LeastRecentlyUsedCacheEvictor(maxCacheSize.toLong())
             val databaseProvider: DatabaseProvider = StandaloneDatabaseProvider(context)
             cache = SimpleCache(cacheDirectory, evictor, databaseProvider)

@@ -47,13 +47,11 @@ class VideoViewModel @Inject constructor(
                 videos.collect{
                     _videos.value = when(it.status){
                         Resource.Status.SUCCESS -> {
-                            val videoItemDto = it.data?.hits?.filterIndexed { index, videoItem ->
-                                index != 0
-                            }?.mapIndexed { index, videoItem ->
+                            val videoItemDto = it.data?.hits?.mapIndexed { index, videoItem ->
 
                                 VideoItemDTO(
                                     id = videoItem.id,
-                                    videoPreviewUrl = videoItem.videos?.medium?.url ?: "",
+                                    videoPreviewUrl = videoItem.videos?.small?.url ?: "",
                                     videoUrl = videoItem.videos?.large?.url ?: "",
                                     isVideoPlaying = index == 0 && _videos.value == null,
                                     isMusicOpen = index == 0 && _videos.value == null,
@@ -128,10 +126,7 @@ class VideoViewModel @Inject constructor(
 
         val newVideoList = _videos.value?.data?.map {
             val isVideoPlaying: Boolean =
-                if (it.id == videoId)
-                    true
-                else
-                    false
+                it.id == videoId
 
             VideoItemDTO(
                 id = it.id.ignoreNull(),
@@ -142,7 +137,6 @@ class VideoViewModel @Inject constructor(
                 videoTag = it.videoTag,
             )
         }
-        //_videos.value = null
         _videos.value = Resource.Companion.success(newVideoList)
     }
 }

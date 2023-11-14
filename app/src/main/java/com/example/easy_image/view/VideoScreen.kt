@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +47,8 @@ import com.easyImage.mediapi.utils.Resource
 import com.example.easy_image.utils.ExoPlayerManager
 import com.example.easy_image.viewmodel.VideoViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 @Composable
@@ -54,57 +57,73 @@ fun VideoScreen(
     openVideoDetail: (String) -> Unit,
     viewModel: VideoViewModel = hiltViewModel()
 ) {
+    // val configuration = LocalConfiguration.current
+    //  val screenHeightDp = configuration.screenHeightDp.dp
     LaunchedEffect(Unit) {
         viewModel.getVideos()
     }
 
-    val videos = viewModel.videos.observeAsState()
-    val listState = remember { LazyListState() }
+    val videosResult = viewModel.videos.observeAsState()
+    val videoList by remember {
+        derivedStateOf {videosResult.value?.data }
+    }
+    val listState by remember {
+        mutableStateOf(LazyListState())
+    }
+    val firstItemOffset = remember { derivedStateOf { listState.layoutInfo.visibleItemsInfo.firstOrNull()?.offset } }
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center
-    ) {
-
-       // val configuration = LocalConfiguration.current
-      //  val screenHeightDp = configuration.screenHeightDp.dp
-
-
-when (videos.value?.status){
-    Resource.Status.SUCCESS -> {
-        val context = LocalContext.current
+    val context = LocalContext.current
+    val coroutine = rememberCoroutineScope()
 
 
 
-        videos.value?.data?.let {
-            val firstItemOffset = remember { derivedStateOf { listState.layoutInfo } }
+    firstItemOffset.value?.let { offset ->
+        videoList?.let videoList@{ videoList->
 
-            firstItemOffset.value.visibleItemsInfo.firstOrNull()?.offset?.let { offset ->
+            if (videoList.isEmpty()) return@let
+            coroutine.launch {
                 val playingVideoITem =
-                    if (offset < 0) it[listState.layoutInfo.visibleItemsInfo.first().index + 1]
-                    else it[listState.layoutInfo.visibleItemsInfo.first().index]
+                if (offset < 0) videoList[listState.layoutInfo.visibleItemsInfo.first().index + 1]
+                    else videoList[listState.layoutInfo.visibleItemsInfo.first().index]
+
+                if (videoList.firstOrNull { it.id == playingVideoITem.id}?.isVideoPlaying == true) return@launch
 
                 viewModel.videoAutoPlayingStatusChanged(playingVideoITem.id)
             }
+        }
 
 
-            LazyColumn(modifier = Modifier.fillMaxSize(),
-                state = listState
+    }
+
+
+
+
+when (videosResult.value?.status){
+    Resource.Status.SUCCESS -> {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center
+        ) {
+            videoList?.let {
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    state = listState
                 ) {
-                items(it,
-                    key = {
-                        it.id
-                    }
-                ) {
+                    items(it,
+                        key = {
+                            it.id
+                        }
+                    ) {
 
-                    var fraction by remember { mutableStateOf(0.0f) }
+                        var fraction by remember { mutableStateOf(0.0f) }
 
-                    val exoPlayer by remember {
-                        val url = it.videoUrl.ifEmpty { it.videoPreviewUrl }
-                        mutableStateOf(
-                            ExoPlayerManager.initializePlayer(context, url)
-                        )
-                    }
+                        val url = it.videoPreviewUrl.ifEmpty { it.videoUrl }
+                        val exoPlayer by remember {
+                            mutableStateOf(
+                                ExoPlayerManager.initializePlayer(context, url)
+                            )
+                        }
 
 
                     LaunchedEffect(it.isVideoPlaying){
@@ -130,77 +149,80 @@ when (videos.value?.status){
                         }
                     }
 
-                    LaunchedEffect(it.isMusicOpen){
-                        exoPlayer.volume = if (it.isMusicOpen) 1f else 0f
-                    }
-
-
-                    Column(modifier = Modifier
-                        .padding(top = 20.dp)
-                        .fillMaxWidth()) {
-
-                        Box (modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.BottomEnd){
-                            Box(modifier = Modifier
-                                .fillMaxSize()
-                                .height(230.dp),
-                                contentAlignment = Alignment.TopEnd
-                            ) {
-                                VideoItemScreen(it, openVideoDetail, viewModel, exoPlayer = exoPlayer)
-
-                                val imageIcon = if (it.isMusicOpen) R.drawable.music_on else R.drawable.music_off
-                                Image(
-                                    modifier = Modifier
-                                        .clickable {
-                                            viewModel.videoMusicStatusChanged(it.id)
-                                        }
-                                        .padding(12.dp),
-                                    painter = painterResource(id = imageIcon), contentDescription = "sound status" )
-
-                            }
-                            val modifier = Modifier
-
-                            Column(
-                                modifier
-                                    .fillMaxWidth()
-                                    .padding(bottom = 4.dp)
-                                    .animateContentSize()
-                                    .then(
-                                        if (it.isVideoPlaying) modifier.wrapContentSize() else modifier.height(
-                                            0.dp
-                                        )
-                                    )) {
-
-                                VideoTimeLineBar(fraction = fraction, Modifier
-                                    .fillMaxWidth()
-                                    .height(3.dp)) {
-                                    val newValue = exoPlayer.duration * it
-                                    exoPlayer.seekTo(newValue.toLong())
-                                }
-                            }
-
+                        LaunchedEffect(it.isMusicOpen){
+                            exoPlayer.volume = if (it.isMusicOpen) 1f else 0f
                         }
 
-                        Text(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 8.dp, top = 2.dp),
-                            text = it.videoTag,
-                            color = Color.Black,
-                            fontSize = 14.sp,
-                            fontFamily = FontFamily.SansSerif
-                        )
-                    }
 
+                        Column(modifier = Modifier
+                            .padding(top = 20.dp)
+                            .fillMaxWidth()) {
+
+                            Box (modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.BottomEnd){
+                                Box(modifier = Modifier
+                                    .fillMaxSize()
+                                    .height(230.dp),
+                                    contentAlignment = Alignment.TopEnd
+                                ) {
+                                    VideoItemScreen(it, openVideoDetail, viewModel, exoPlayer = exoPlayer)
+
+                                    val imageIcon = if (it.isMusicOpen) R.drawable.music_on else R.drawable.music_off
+                                    Image(
+                                        modifier = Modifier
+                                            .clickable {
+                                                viewModel.videoMusicStatusChanged(it.id)
+                                            }
+                                            .padding(12.dp),
+                                        painter = painterResource(id = imageIcon), contentDescription = "sound status" )
+
+                                }
+                                val modifier = Modifier
+
+                                Column(
+                                    modifier
+                                        .fillMaxWidth()
+                                        .padding(bottom = 4.dp)
+                                        .animateContentSize()
+                                        .then(
+                                            if (it.isVideoPlaying) modifier.wrapContentSize() else modifier.height(
+                                                0.dp
+                                            )
+                                        )) {
+
+                                    VideoTimeLineBar(fraction = fraction, Modifier
+                                        .fillMaxWidth()
+                                        .height(3.dp)) {
+                                        val newValue = exoPlayer.duration * it
+                                        exoPlayer.seekTo(newValue.toLong())
+                                    }
+                                }
+
+                            }
+
+                            Text(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 8.dp, top = 2.dp),
+                                text = it.videoTag,
+                                color = Color.Black,
+                                fontSize = 14.sp,
+                                fontFamily = FontFamily.SansSerif
+                            )
+                        }
+
+                    }
                 }
             }
+
         }
+
+
     }
     Resource.Status.ERROR -> "TODO()"
     Resource.Status.LOADING -> "TODO()"
     Resource.Status.RESET -> "TODO()"
     null -> ""
 }
-    }
 }
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 @Composable
