@@ -64,12 +64,8 @@ fun VideoScreen(
     }
 
     val videosResult = viewModel.videos.observeAsState()
-    val videoList by remember {
-        derivedStateOf {videosResult.value?.data }
-    }
-    val listState by remember {
-        mutableStateOf(LazyListState())
-    }
+    val videoList by remember { derivedStateOf {videosResult.value?.data } }
+    val listState by remember { mutableStateOf(LazyListState()) }
     val firstItemOffset = remember { derivedStateOf { listState.layoutInfo.visibleItemsInfo.firstOrNull()?.offset } }
 
     val context = LocalContext.current
@@ -77,14 +73,35 @@ fun VideoScreen(
 
 
 
+
     firstItemOffset.value?.let { offset ->
         videoList?.let videoList@{ videoList->
-
             if (videoList.isEmpty()) return@let
+
+
+            val fullyVisibleItemsInfo = listState.layoutInfo.visibleItemsInfo.toMutableList()
+
+            val viewportHeight = listState.layoutInfo.viewportEndOffset + listState.layoutInfo.viewportStartOffset
+            val lastItem = fullyVisibleItemsInfo.last()
+            val firstItemIfLeft = fullyVisibleItemsInfo.firstOrNull()
+
+
+            if (lastItem.offset + lastItem.size > viewportHeight) {
+                fullyVisibleItemsInfo.removeLast()
+            }
+            if (firstItemIfLeft != null && firstItemIfLeft.offset < listState.layoutInfo.viewportStartOffset) {
+                fullyVisibleItemsInfo.removeFirst()
+            }
+
+            val playingVideoIndex = fullyVisibleItemsInfo.firstOrNull()?.index ?: return@let
+
             coroutine.launch {
+                viewportHeight
                 val playingVideoITem =
-                if (offset < 0) videoList[listState.layoutInfo.visibleItemsInfo.first().index + 1]
-                    else videoList[listState.layoutInfo.visibleItemsInfo.first().index]
+                    if (true)
+                        videoList[playingVideoIndex]
+                    else
+                        videoList[playingVideoIndex]
 
                 if (videoList.firstOrNull { it.id == playingVideoITem.id}?.isVideoPlaying == true) return@launch
 
