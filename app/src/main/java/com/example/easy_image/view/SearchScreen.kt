@@ -55,10 +55,10 @@ fun SearchScreen (searchMediaText : (String) -> Unit) {
             },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
             label = {
-                Text(text = "search image")
+                Text(text = "search Media")
             },
             placeholder = {
-                Text(text = "search image")
+                Text(text = "search Media")
             },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
 
