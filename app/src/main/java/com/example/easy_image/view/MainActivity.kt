@@ -43,7 +43,6 @@ import com.example.easy_image.utils.EnterAnimation
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
-import kotlin.system.measureTimeMillis
 
 
 @AndroidEntryPoint
@@ -151,20 +150,29 @@ class MainActivity : ComponentActivity() {
 
 
 
-            composable(NavigationDirections.Video.route) {
+            composable(NavigationDirections.Video.route,
+                arguments = listOf(navArgument("searchMediaText") { type = NavType.StringType })
+            ) {
+                var searchMediaText = (it.arguments?.getString("searchMediaText"))
+                if (searchMediaText == "searchMediaText") {
+                    searchMediaText = "car"
+                }
+
                 val openVideoDetail = { imageUrl : String ->
                     navController.navigate(NavigationDirections.DetailScreen.createRoute(imageUrl = imageUrl))
                 }
 
                 EnterAnimation(content = {
-                    VideoScreen(navController = navController,openVideoDetail)
+                    VideoScreen(navController = navController,openVideoDetail, searchMediaText)
                 })
             }
 
             composable(NavigationDirections.SearchScreen.route) {
                 EnterAnimation(content = {
 
-                    SearchScreen()
+                    SearchScreen(){
+                        navController.navigate(NavigationDirections.Video.createRoute(it))
+                    }
                 })
             }
 

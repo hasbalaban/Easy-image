@@ -48,19 +48,19 @@ import com.example.easy_image.utils.ExoPlayerManager
 import com.example.easy_image.viewmodel.VideoViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.math.abs
 
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 @Composable
 fun VideoScreen(
     navController: NavController,
     openVideoDetail: (String) -> Unit,
+    searchMediaText : String?,
     viewModel: VideoViewModel = hiltViewModel()
 ) {
     // val configuration = LocalConfiguration.current
     //  val screenHeightDp = configuration.screenHeightDp.dp
     LaunchedEffect(Unit) {
-        viewModel.getVideos()
+        viewModel.getVideos(searchMediaText)
     }
 
     val videosResult = viewModel.videos.observeAsState()

@@ -21,17 +21,12 @@ class VideoViewModel @Inject constructor(
     private var currentImageRequestPage = 1
 
     fun getVideos(
-        query: String = "car",
+        query: String?,
         shouldClearPhotos : Boolean = false
     ){
-        var queryText = query
+        val queryText = query ?: "car"
         if (shouldClearPhotos) {
             _videos.value = null
-            currentImageRequestPage = 1
-        }
-
-        if (queryText.isEmpty()){
-            queryText = "planet"
             currentImageRequestPage = 1
         }
 
@@ -40,7 +35,7 @@ class VideoViewModel @Inject constructor(
                 val videos = videoRepository.getVideos(
                     time = 0,
                     key = "39342921-c040c554a9e966b3202b73519",
-                    query = query,
+                    query = queryText,
                     page = currentImageRequestPage
                 )
 
