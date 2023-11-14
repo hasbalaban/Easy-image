@@ -93,15 +93,13 @@ fun VideoScreen(
                 fullyVisibleItemsInfo.removeFirst()
             }
 
-            val playingVideoIndex = fullyVisibleItemsInfo.firstOrNull()?.index ?: return@let
+            val playingVideoIndex = if (fullyVisibleItemsInfo.last().index == videoList.size - 1)
+                fullyVisibleItemsInfo.last().index
+            else
+                fullyVisibleItemsInfo.firstOrNull()?.index ?: return@let
 
             coroutine.launch {
-                viewportHeight
-                val playingVideoITem =
-                    if (true)
-                        videoList[playingVideoIndex]
-                    else
-                        videoList[playingVideoIndex]
+                val playingVideoITem = videoList[playingVideoIndex]
 
                 if (videoList.firstOrNull { it.id == playingVideoITem.id}?.isVideoPlaying == true) return@launch
 
