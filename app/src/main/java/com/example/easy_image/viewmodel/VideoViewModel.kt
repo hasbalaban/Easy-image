@@ -54,7 +54,7 @@ class VideoViewModel @Inject constructor(
                                     videoPreviewUrl = videoItem.videos?.small?.url ?: "",
                                     videoUrl = videoItem.videos?.large?.url ?: "",
                                     isVideoPlaying = index == 0 && _videos.value == null,
-                                    isMusicOpen = index == 0 && _videos.value == null,
+                                    isMusicOpen = true,
                                     videoTag =videoItem.tags ?: ""
                                 )
                             }
