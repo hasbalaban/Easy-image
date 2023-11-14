@@ -88,7 +88,7 @@ class MainActivity : ComponentActivity() {
 
         NavHost(
             modifier = Modifier.padding(paddingValues),
-            navController = navController, startDestination = NavigationDirections.Video.route ) {
+            navController = navController, startDestination = NavigationDirections.SearchScreen.route ) {
 
 
             composable(NavigationDirections.HomeScreen.route) {
@@ -164,6 +164,7 @@ class MainActivity : ComponentActivity() {
             composable(NavigationDirections.SearchScreen.route) {
                 EnterAnimation(content = {
 
+                    SearchScreen()
                 })
             }
 
