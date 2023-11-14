@@ -66,7 +66,6 @@ fun VideoScreen(
     val videosResult = viewModel.videos.observeAsState()
     val videoList by remember { derivedStateOf {videosResult.value?.data } }
     val listState by remember { mutableStateOf(LazyListState()) }
-    val firstItemOffset = remember { derivedStateOf { listState.layoutInfo.visibleItemsInfo.firstOrNull()?.offset } }
 
     val context = LocalContext.current
     val coroutine = rememberCoroutineScope()
@@ -74,41 +73,40 @@ fun VideoScreen(
 
 
 
-    firstItemOffset.value?.let { offset ->
-        videoList?.let videoList@{ videoList->
-            if (videoList.isEmpty()) return@let
+    videoList?.let{
+        if (it.isEmpty()) return@let
+        if (!listState.isScrollInProgress) return@let
 
 
-            val fullyVisibleItemsInfo = listState.layoutInfo.visibleItemsInfo.toMutableList()
+        val fullyVisibleItemsInfo = listState.layoutInfo.visibleItemsInfo.toMutableList()
 
-            val viewportHeight = listState.layoutInfo.viewportEndOffset + listState.layoutInfo.viewportStartOffset
-            val lastItem = fullyVisibleItemsInfo.last()
-            val firstItemIfLeft = fullyVisibleItemsInfo.firstOrNull()
+        val viewportHeight =
+            listState.layoutInfo.viewportEndOffset + listState.layoutInfo.viewportStartOffset
+        val lastItem = fullyVisibleItemsInfo.last()
+        val firstItemIfLeft = fullyVisibleItemsInfo.firstOrNull()
 
 
-            if (lastItem.offset + lastItem.size > viewportHeight) {
-                fullyVisibleItemsInfo.removeLast()
-            }
-            if (firstItemIfLeft != null && firstItemIfLeft.offset < listState.layoutInfo.viewportStartOffset) {
-                fullyVisibleItemsInfo.removeFirst()
-            }
-
-            val playingVideoIndex = if (fullyVisibleItemsInfo.last().index == videoList.size - 1)
-                fullyVisibleItemsInfo.last().index
-            else
-                fullyVisibleItemsInfo.firstOrNull()?.index ?: return@let
-
-            coroutine.launch {
-                val playingVideoITem = videoList[playingVideoIndex]
-
-                if (videoList.firstOrNull { it.id == playingVideoITem.id}?.isVideoPlaying == true) return@launch
-
-                viewModel.videoAutoPlayingStatusChanged(playingVideoITem.id)
-            }
+        if (lastItem.offset + lastItem.size > viewportHeight) {
+            fullyVisibleItemsInfo.removeLast()
+        }
+        if (firstItemIfLeft != null && firstItemIfLeft.offset < listState.layoutInfo.viewportStartOffset) {
+            fullyVisibleItemsInfo.removeFirst()
         }
 
+        val playingVideoIndex = if (fullyVisibleItemsInfo.last().index == it.size - 1)
+            fullyVisibleItemsInfo.last().index
+        else
+            fullyVisibleItemsInfo.firstOrNull()?.index ?: return@let
 
+        coroutine.launch {
+            val playingVideoITem = it[playingVideoIndex]
+
+            if (it.firstOrNull { it.id == playingVideoITem.id }?.isVideoPlaying == true) return@launch
+
+            viewModel.videoAutoPlayingStatusChanged(playingVideoITem.id)
+        }
     }
+
 
 
 

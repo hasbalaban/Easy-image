@@ -25,7 +25,7 @@ object ExoPlayerManager {
         val player = players.firstOrNull { it.playbackState == Player.STATE_IDLE }?.also {
             it.setHandleAudioBecomingNoisy(true)
             setMediaItem(it, videoUri)
-            it.prepare()
+          //  it.prepare()
         }
             ?: createNewPlayer(context, videoUri = videoUri)
         players.remove(player)
@@ -38,7 +38,7 @@ object ExoPlayerManager {
         player.setHandleAudioBecomingNoisy(true)
         player.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
         setMediaItem(player, videoUri)
-        player.prepare()
+    //    player.prepare()
         return player
     }
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
