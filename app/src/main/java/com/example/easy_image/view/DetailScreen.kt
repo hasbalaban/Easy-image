@@ -297,7 +297,7 @@ private fun VideoDetailScreen(videoUrl: String) {
         ) {
 
             VideoTimeLineBar(fraction = fraction, Modifier
-                .height(2.dp)
+                .height(3.dp)
                 .fillMaxWidth()) {
                 val newValue = exoPlayer.duration * it
                 exoPlayer.seekTo(newValue.toLong())

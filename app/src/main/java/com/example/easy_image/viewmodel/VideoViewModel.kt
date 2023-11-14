@@ -87,7 +87,7 @@ class VideoViewModel @Inject constructor(
                 if (it.id == videoId)
                     it.isMusicOpen.not()
                 else
-                    false
+                    it.isMusicOpen
 
             VideoItemDTO(
                 id = it.id.ignoreNull(),
@@ -118,7 +118,6 @@ class VideoViewModel @Inject constructor(
                 videoTag = it.videoTag,
             )
         }
-        //_videos.value = null
         _videos.value = Resource.Companion.success(newVideoList)
     }
     fun videoAutoPlayingStatusChanged(videoId : Int){
