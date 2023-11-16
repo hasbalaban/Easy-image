@@ -154,7 +154,7 @@ class MainActivity : ComponentActivity() {
                 arguments = listOf(navArgument("searchMediaText") { type = NavType.StringType })
             ) {
                 var searchMediaText = (it.arguments?.getString("searchMediaText"))
-                if (searchMediaText == "searchMediaText") {
+                if (searchMediaText?.contains("searchMediaText") == true) {
                     searchMediaText = "car"
                 }
 
