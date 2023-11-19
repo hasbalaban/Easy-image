@@ -87,7 +87,7 @@ class MainActivity : ComponentActivity() {
 
         NavHost(
             modifier = Modifier.padding(paddingValues),
-            navController = navController, startDestination = NavigationDirections.SearchScreen.route ) {
+            navController = navController, startDestination = NavigationDirections.AutoPlayPage.route ) {
 
 
             composable(NavigationDirections.HomeScreen.route) {
@@ -165,6 +165,10 @@ class MainActivity : ComponentActivity() {
                 EnterAnimation(content = {
                     VideoScreen(navController = navController,openVideoDetail, searchMediaText)
                 })
+            }
+
+            composable(NavigationDirections.AutoPlayPage.route){
+                AutoPlayScreen()
             }
 
             composable(NavigationDirections.SearchScreen.route) {

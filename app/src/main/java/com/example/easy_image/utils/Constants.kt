@@ -7,6 +7,7 @@ sealed class NavigationDirections(val route: String) {
     data object Video : NavigationDirections("videoScreen/{searchMediaText}"){
         fun createRoute(searchMediaText : String) = "videoScreen/$searchMediaText"
     }
+    data object AutoPlayPage : NavigationDirections("autoPlayPage")
     data object SearchScreen : NavigationDirections("SearchScreen")
     data object DetailScreen: NavigationDirections("DetailScreen?imageUrl={imageUrl}&hash={hash}") {
         fun createRoute(imageUrl: String) = "DetailScreen?imageUrl=$imageUrl"

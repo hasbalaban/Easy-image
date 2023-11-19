@@ -241,8 +241,8 @@ when (videosResult.value?.status){
 @Composable
 fun VideoItemScreen(
     videoItemDTO: VideoItemDTO,
-    openVideoDetail: (String) -> Unit,
-    viewModel: VideoViewModel,
+    openVideoDetail: ((String) -> Unit?)?,
+    viewModel: VideoViewModel?,
     exoPlayer: ExoPlayer
 ) {
     val context = LocalContext.current
@@ -253,10 +253,12 @@ fun VideoItemScreen(
                 onDoubleTap = {
                     val url = videoItemDTO.videoUrl.ifEmpty { videoItemDTO.videoPreviewUrl }
 
-                    openVideoDetail(url)
+                    if (openVideoDetail != null) {
+                        openVideoDetail(url)
+                    }
                 },
                 onTap = {
-                    viewModel.videoVideoPlayingStatusChanged(videoItemDTO.id)
+                    viewModel?.videoVideoPlayingStatusChanged(videoItemDTO.id)
                 }
             )
 
@@ -266,14 +268,14 @@ fun VideoItemScreen(
         PlayerView(context).apply {
             player = exoPlayer.apply {
                 setShowBuffering(SHOW_BUFFERING_ALWAYS)
-                useController = false
+         //       useController = false
 
             }
         }
     }
     )) {
         onDispose {
-            ExoPlayerManager.releasePlayer(exoPlayer = exoPlayer)
+          //  ExoPlayerManager.releasePlayer(exoPlayer = exoPlayer)
         }
     }
 
