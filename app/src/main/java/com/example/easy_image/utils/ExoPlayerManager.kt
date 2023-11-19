@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.common.Player.REPEAT_MODE_ONE
 import androidx.media3.database.DatabaseProvider
 import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.DataSource
@@ -20,24 +21,24 @@ import java.io.File
 object ExoPlayerManager {
     private val players: MutableList<ExoPlayer> = mutableListOf()
 
-    fun initializePlayer(context: Context , videoUri: String): ExoPlayer {
+    fun initializePlayer(context: Context , videoUri: String, repeatMode: Int = REPEAT_MODE_ONE): ExoPlayer {
         CacheManager.initialize(context)
         val player = players.firstOrNull { it.playbackState == Player.STATE_IDLE }?.also {
             it.setHandleAudioBecomingNoisy(true)
-            setMediaItem(it, videoUri)
+            setMediaItem(it, videoUri, repeatMode = repeatMode)
           //  it.prepare()
         }
-            ?: createNewPlayer(context, videoUri = videoUri)
+            ?: createNewPlayer(context, videoUri = videoUri, repeatMode)
         players.remove(player)
         return player
     }
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-    fun createNewPlayer(context: Context, videoUri: String): ExoPlayer {
+    fun createNewPlayer(context: Context, videoUri: String, repeatMode: Int = REPEAT_MODE_ONE): ExoPlayer {
         val player = ExoPlayer.Builder(context).build()
         player.setHandleAudioBecomingNoisy(true)
         player.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
-        setMediaItem(player, videoUri)
+        setMediaItem(player, videoUri, repeatMode = repeatMode)
     //    player.prepare()
         return player
     }
@@ -45,6 +46,7 @@ object ExoPlayerManager {
     fun setMediaItem(
         exoPlayer: ExoPlayer,
         videoUri: String,
+        repeatMode : Int = REPEAT_MODE_ONE
     ) {
         val cacheDataSourceFactory: DataSource.Factory =
             CacheDataSource.Factory()
@@ -57,7 +59,7 @@ object ExoPlayerManager {
             .createMediaSource(MediaItem.fromUri(videoUri))
 
         exoPlayer.setMediaSource(mediaSource)
-        exoPlayer.repeatMode = Player.REPEAT_MODE_ONE
+        exoPlayer.repeatMode = repeatMode
         exoPlayer.playWhenReady = true
     }
 
