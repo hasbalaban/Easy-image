@@ -1,9 +1,6 @@
 package com.example.easy_image.view
 
-import android.content.Context.WINDOW_SERVICE
-import android.view.WindowManager
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,14 +17,11 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.easyImage.mediapi.model.VideoItemDTO
 import com.example.easy_image.utils.ExoPlayerManager
-import com.example.easy_image.utils.ignoreNull
 import com.example.easy_image.viewmodel.VideoViewModel
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -49,9 +43,11 @@ fun AutoPlayScreen (
         viewModel.getVideos("car", true)
     }
 
+    val coroutines = rememberCoroutineScope()
 
+    val items = list.value?.data
 
-        list.value?.data?.let {
+    items?.let {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 state = state,
@@ -62,14 +58,19 @@ fun AutoPlayScreen (
                     val exoPlayer by remember {
                         mutableStateOf(
                             ExoPlayerManager.initializePlayer(context, it.videoUrl).also {
-
-                                //  it.prepare()
-                                //   it.play()
+                                it.prepare()
+                                it.play()
                             }
                         )
                     }
                     Column (modifier = Modifier.height(windowHeight), verticalArrangement = Arrangement.Center){
-                        VideoItemScreen(it, null, null, exoPlayer = exoPlayer)
+                        VideoItemScreen(it, null, null, exoPlayer = exoPlayer){
+                            coroutines.launch {
+                                if (items.size > state.firstVisibleItemIndex + 1){
+                                    state.animateScrollToItem(state.firstVisibleItemIndex + 1)
+                                }
+                            }
+                        }
                         Text(text = it.videoTag)
                     }
 

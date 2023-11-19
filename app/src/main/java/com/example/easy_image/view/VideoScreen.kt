@@ -1,5 +1,7 @@
 package com.example.easy_image.view
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -37,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import androidx.media3.ui.PlayerView.SHOW_BUFFERING_ALWAYS
@@ -134,7 +137,7 @@ when (videosResult.value?.status){
                         val url = it.videoPreviewUrl.ifEmpty { it.videoUrl }
                         val exoPlayer by remember {
                             mutableStateOf(
-                                ExoPlayerManager.initializePlayer(context, url)
+                                ExoPlayerManager.initializePlayer(context, url, Player.REPEAT_MODE_OFF )
                             )
                         }
 
@@ -177,7 +180,7 @@ when (videosResult.value?.status){
                                     .height(230.dp),
                                     contentAlignment = Alignment.TopEnd
                                 ) {
-                                    VideoItemScreen(it, openVideoDetail, viewModel, exoPlayer = exoPlayer)
+                                    VideoItemScreen(it, openVideoDetail, viewModel, exoPlayer = exoPlayer, null)
 
                                     val imageIcon = if (it.isMusicOpen) R.drawable.music_on else R.drawable.music_off
                                     Image(
@@ -243,9 +246,23 @@ fun VideoItemScreen(
     videoItemDTO: VideoItemDTO,
     openVideoDetail: ((String) -> Unit?)?,
     viewModel: VideoViewModel?,
-    exoPlayer: ExoPlayer
+    exoPlayer: ExoPlayer,
+    playNextVideo: (() -> Unit)?
 ) {
     val context = LocalContext.current
+
+    val listener by remember {
+        mutableStateOf(object : Player.Listener{
+            override fun onRenderedFirstFrame() {
+                super.onRenderedFirstFrame()
+                if (exoPlayer.currentPosition / 1000 == exoPlayer.duration / 1000) {
+                    if (playNextVideo != null) {
+                        playNextVideo()
+                    }
+                }
+            }
+        })
+    }
 
     DisposableEffect(AndroidView(modifier = Modifier
         .pointerInput(Unit) {
@@ -268,6 +285,8 @@ fun VideoItemScreen(
         PlayerView(context).apply {
             player = exoPlayer.apply {
                 setShowBuffering(SHOW_BUFFERING_ALWAYS)
+                addListener(listener)
+
          //       useController = false
 
             }
@@ -275,7 +294,7 @@ fun VideoItemScreen(
     }
     )) {
         onDispose {
-          //  ExoPlayerManager.releasePlayer(exoPlayer = exoPlayer)
+            ExoPlayerManager.releasePlayer(exoPlayer = exoPlayer)
         }
     }
 
@@ -292,4 +311,9 @@ fun VideoItemScreen(
 
 
 }
+
+private fun showToast(context: Context) {
+    Toast.makeText(context, "message", Toast.LENGTH_SHORT).show()
+}
+
 
