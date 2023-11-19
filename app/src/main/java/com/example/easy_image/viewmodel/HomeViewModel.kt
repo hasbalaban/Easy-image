@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.easyImage.mediapi.model.ImageDTO
-import com.easyImage.mediapi.repository.video.VideoRepository
+import com.easyImage.mediapi.repository.video.VideoRepositoryImpl
 import com.easyImage.mediapi.service.ImageService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -15,7 +15,7 @@ import kotlin.Exception
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val videoRepository : VideoRepository
+    private val videoRepository : VideoRepositoryImpl
 ): MainViewModel() {
 
 

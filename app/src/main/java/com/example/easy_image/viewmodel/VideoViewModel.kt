@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.easyImage.mediapi.model.VideoItemDTO
-import com.easyImage.mediapi.repository.video.VideoRepository
+import com.easyImage.mediapi.repository.video.VideoRepositoryImpl
 import com.easyImage.mediapi.utils.Resource
 import com.example.easy_image.utils.ignoreNull
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class VideoViewModel @Inject constructor(
-    private val videoRepository : VideoRepository
+    private val videoRepository : VideoRepositoryImpl
 ) : MainViewModel() {
 
     private val _videos = MutableLiveData<Resource<List<VideoItemDTO>?>>()

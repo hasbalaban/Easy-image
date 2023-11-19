@@ -6,7 +6,7 @@ import com.easyImage.mediapi.utils.handleResponse
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class VideoRepository @Inject constructor(
+class VideoRepositoryImpl @Inject constructor(
     private val localVideoDataSource: LocalVideoDataSource,
     private val remoteVideoDataSource: RemoteVideoDataSource,
 ) {
