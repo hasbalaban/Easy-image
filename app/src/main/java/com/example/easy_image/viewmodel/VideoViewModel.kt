@@ -42,17 +42,7 @@ class VideoViewModel @Inject constructor(
                 videos.collect{
                     _videos.value = when(it.status){
                         Resource.Status.SUCCESS -> {
-                            val videoItemDto = it.data?.hits?.mapIndexed { index, videoItem ->
-
-                                VideoItemDTO(
-                                    id = videoItem.id,
-                                    videoPreviewUrl = videoItem.videos?.small?.url ?: "",
-                                    videoUrl = videoItem.videos?.large?.url ?: "",
-                                    isVideoPlaying = index == 0 && _videos.value == null,
-                                    isMusicOpen = true,
-                                    videoTag =videoItem.tags ?: ""
-                                )
-                            }
+                            val videoItemDto = it.data
                             _videos.value?.data?.let {
                                 val newList = it +  videoItemDto
                                 Resource.success(newList)
@@ -64,7 +54,7 @@ class VideoViewModel @Inject constructor(
 
                             Resource.success(videoItemDto)
                         }
-                        Resource.Status.ERROR -> Resource.error("error", null)
+                        Resource.Status.ERROR -> Resource.error(it.message ?: "", null)
                         Resource.Status.LOADING -> Resource.loading(null)
                         Resource.Status.RESET -> Resource.reset()
                     }
