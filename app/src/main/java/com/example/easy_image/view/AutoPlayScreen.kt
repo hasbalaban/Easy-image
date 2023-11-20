@@ -1,6 +1,9 @@
 package com.example.easy_image.view
 
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -67,7 +70,10 @@ fun AutoPlayScreen (
                         VideoItemScreen(it, null, null, exoPlayer = exoPlayer){
                             coroutines.launch {
                                 if (items.size > state.firstVisibleItemIndex + 1){
-                                    state.animateScrollToItem(state.firstVisibleItemIndex + 1)
+                                    state.apply {
+                                        animateScrollBy(15f)
+                                        animateScrollToItem(state.firstVisibleItemIndex + 1)
+                                    }
                                 }
                             }
                         }
