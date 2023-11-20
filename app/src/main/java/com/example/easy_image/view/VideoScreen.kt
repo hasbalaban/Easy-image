@@ -255,10 +255,8 @@ fun VideoItemScreen(
         mutableStateOf(object : Player.Listener{
             override fun onRenderedFirstFrame() {
                 super.onRenderedFirstFrame()
-                if (exoPlayer.currentPosition / 1000 == exoPlayer.duration / 1000) {
-                    if (playNextVideo != null) {
-                        playNextVideo()
-                    }
+                if (playNextVideo != null && exoPlayer.isPlaying && exoPlayer.currentPosition - exoPlayer.duration < 100) {
+                    playNextVideo()
                 }
             }
         })
