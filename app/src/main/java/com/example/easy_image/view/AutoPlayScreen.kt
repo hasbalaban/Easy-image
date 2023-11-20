@@ -1,6 +1,8 @@
 package com.example.easy_image.view
 
 import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.animateScrollBy
@@ -71,7 +73,11 @@ fun AutoPlayScreen (
                             coroutines.launch {
                                 if (items.size > state.firstVisibleItemIndex + 1){
                                     state.apply {
-                                        animateScrollBy(15f)
+                                        animateScrollBy(1f, spring(
+                                            dampingRatio = Spring.DampingRatioNoBouncy,
+                                            stiffness = Spring.StiffnessHigh,
+                                            null
+                                        ))
                                         animateScrollToItem(state.firstVisibleItemIndex + 1)
                                     }
                                 }
