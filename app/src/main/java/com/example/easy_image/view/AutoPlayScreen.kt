@@ -96,7 +96,7 @@ fun AutoPlayScreen (
                                     }
                                 }
                             }
-                            Text(text = it.videoTag)
+                            Text(text = it.videoTag, color = Color.White)
                         }
 
 
