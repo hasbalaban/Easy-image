@@ -5,9 +5,11 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -20,6 +22,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -68,22 +72,35 @@ fun AutoPlayScreen (
                             }
                         )
                     }
-                    Column (modifier = Modifier.height(windowHeight), verticalArrangement = Arrangement.Center){
-                        VideoItemScreen(it, null, null, exoPlayer = exoPlayer){
-                            coroutines.launch {
-                                if (items.size > state.firstVisibleItemIndex + 1){
-                                    state.apply {
-                                        animateScrollBy(1f, spring(
-                                            dampingRatio = Spring.DampingRatioNoBouncy,
-                                            stiffness = Spring.StiffnessHigh,
-                                            null
-                                        ))
-                                        animateScrollToItem(state.firstVisibleItemIndex + 1)
+
+
+                    Box (modifier = Modifier.height(windowHeight)){
+                        Box(modifier = Modifier.fillMaxSize()
+                            .alpha(0.8f)
+                            .background(Color.Black)){
+
+                        }
+
+                        Column (modifier = Modifier.height(windowHeight), verticalArrangement = Arrangement.Center){
+                            VideoItemScreen(it, null, null, exoPlayer = exoPlayer){
+                                coroutines.launch {
+                                    if (items.size > state.firstVisibleItemIndex + 1){
+                                        state.apply {
+                                            animateScrollBy(1f, spring(
+                                                dampingRatio = Spring.DampingRatioNoBouncy,
+                                                stiffness = Spring.StiffnessHigh,
+                                                null
+                                            ))
+                                            animateScrollToItem(state.firstVisibleItemIndex + 1)
+                                        }
                                     }
                                 }
                             }
+                            Text(text = it.videoTag)
                         }
-                        Text(text = it.videoTag)
+
+
+
                     }
 
                 }
