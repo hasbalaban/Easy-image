@@ -285,7 +285,7 @@ fun VideoItemScreen(
                 setShowBuffering(SHOW_BUFFERING_ALWAYS)
                 addListener(listener)
 
-         //       useController = false
+                useController = false
 
             }
         }

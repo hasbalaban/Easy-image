@@ -24,7 +24,7 @@ class VideoViewModel @Inject constructor(
         query: String?,
         shouldClearPhotos : Boolean = false
     ){
-        val queryText = query ?: "car"
+        val queryText = query ?: "roket"
         if (shouldClearPhotos) {
             _videos.value = null
             currentImageRequestPage = 1

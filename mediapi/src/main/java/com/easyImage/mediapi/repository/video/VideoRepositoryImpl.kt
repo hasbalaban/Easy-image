@@ -1,7 +1,6 @@
 package com.easyImage.mediapi.repository.video
 
 import com.easyImage.mediapi.model.VideoItemDTO
-import com.easyImage.mediapi.model.VideoResponse
 import com.easyImage.mediapi.utils.Resource
 import com.easyImage.mediapi.utils.handleResponse
 import kotlinx.coroutines.flow.Flow
@@ -10,7 +9,7 @@ import javax.inject.Inject
 
 open class VideoRepositoryImpl @Inject constructor(
     private val remoteVideoDataSource: RemoteVideoDataSource,
-) : VideoRepositoryOperations1 {
+) : VideoRepositoryOperations {
     override suspend fun getVideos(
         time: Long,
         key : String,
@@ -32,7 +31,7 @@ open class VideoRepositoryImpl @Inject constructor(
                                 id = videoItem.id,
                                 videoPreviewUrl = videoItem.videos?.small?.url ?: "",
                                 videoUrl = videoItem.videos?.large?.url ?: "",
-                                isVideoPlaying = true,
+                                isVideoPlaying = false,
                                 isMusicOpen = true,
                                 videoTag =videoItem.tags ?: ""
                             )
@@ -54,16 +53,6 @@ open class VideoRepositoryImpl @Inject constructor(
 }
 
 interface VideoRepositoryOperations{
-    suspend fun getVideos(
-        time: Long,
-        key : String,
-        query : String,
-        page : Int
-
-    ): Flow<Resource<VideoResponse?>>
-
-}
-interface VideoRepositoryOperations1{
     suspend fun getVideos(
         time: Long,
         key : String,

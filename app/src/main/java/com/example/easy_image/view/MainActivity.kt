@@ -155,7 +155,7 @@ class MainActivity : ComponentActivity() {
             ) {
                 var searchMediaText = (it.arguments?.getString("searchMediaText"))
                 if (searchMediaText?.contains("searchMediaText") == true) {
-                    searchMediaText = "car"
+                    searchMediaText = "roket"
                 }
 
                 val openVideoDetail = { imageUrl : String ->
