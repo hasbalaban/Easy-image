@@ -132,7 +132,7 @@ when (videosResult.value?.status){
                         }
                     ) {
 
-                        var fraction by remember { mutableStateOf(0.0f) }
+                        var fraction by remember { mutableStateOf(0.1f) }
 
                         val url = it.videoPreviewUrl.ifEmpty { it.videoUrl }
                         val exoPlayer by remember {
