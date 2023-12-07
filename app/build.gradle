@@ -89,6 +89,7 @@ dependencies {
 
     implementation fileTree(include: ['*.aar'], dir: 'libs' )
     implementation project(':mediapi')
+    implementation(project(":media"))
 
     implementation 'androidx.core:core-ktx:1.8.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'

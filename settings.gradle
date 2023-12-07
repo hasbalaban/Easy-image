@@ -16,3 +16,5 @@ rootProject.name = "saveWhattsappMedia"
 include ':app'
 include ':mediapi'
 include ':apptest'
+include(":media")
+
