@@ -47,6 +47,7 @@ class VideoViewModel @Inject constructor(
                                 val newList = it +  videoItemDto
                                 Resource.success(newList)
                             }?: run{
+                                videoItemDto?.firstOrNull()?.isVideoPlaying = true
                                 Resource.success(videoItemDto)
                             }
 
@@ -109,8 +110,7 @@ class VideoViewModel @Inject constructor(
         if (_videos.value?.data?.firstOrNull { it.id == videoId }?.isVideoPlaying == true) return
 
         val newVideoList = _videos.value?.data?.map {
-            val isVideoPlaying: Boolean =
-                it.id == videoId
+            val isVideoPlaying: Boolean = it.id == videoId
 
             VideoItemDTO(
                 id = it.id.ignoreNull(),

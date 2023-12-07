@@ -45,7 +45,7 @@ fun AutoPlayScreen (
 ) {
     val list = viewModel.videos.observeAsState()
     val context = LocalContext.current
-    val state = rememberLazyListState()
+    val listState = rememberLazyListState()
 
 
     var windowHeight by remember {
@@ -54,24 +54,42 @@ fun AutoPlayScreen (
     windowHeight = LocalConfiguration.current.screenHeightDp.dp
 
     LaunchedEffect(Unit){
-        viewModel.getVideos("car", true)
+        viewModel.getVideos("roket", true)
     }
 
     val coroutines = rememberCoroutineScope()
 
     val items = list.value?.data
 
+    val fullyVisibleItemsInfo = remember { derivedStateOf { listState.layoutInfo.visibleItemsInfo.toMutableList() } }
+
+
+    fullyVisibleItemsInfo.value.firstOrNull()?.let {
+        items?.get(it.index)?.let {
+            viewModel.videoAutoPlayingStatusChanged(it.id)
+        }
+    }
+
+
     items?.let {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                state = state,
-                flingBehavior = rememberSnapFlingBehavior(lazyListState = state),
+                state = listState,
+                flingBehavior = rememberSnapFlingBehavior(lazyListState = listState),
 
                 ){
                 items(it){
                     val exoPlayer = rememberMediaPlayer()
                     LaunchedEffect(exoPlayer){
                         exoPlayer.addMediaItem(it.videoPreviewUrl).startVideo()
+                    }
+
+                    LaunchedEffect(it.isVideoPlaying){
+                        if (it.isVideoPlaying) {
+                            exoPlayer.play()
+                            return@LaunchedEffect
+                        }
+                        exoPlayer.pause()
                     }
 
                     Box (modifier = Modifier.height(windowHeight)){
@@ -84,15 +102,17 @@ fun AutoPlayScreen (
 
                         Column (modifier = Modifier.height(windowHeight), verticalArrangement = Arrangement.Center){
                             VideoItemScreen(it, null, null, exoPlayer = exoPlayer){
+
                                 coroutines.launch {
-                                    if (items.size > state.firstVisibleItemIndex + 1){
-                                        state.apply {
+                                    if (items.size > listState.firstVisibleItemIndex + 1){
+                                        listState.apply {
                                             animateScrollBy(1f, spring(
                                                 dampingRatio = Spring.DampingRatioNoBouncy,
                                                 stiffness = Spring.StiffnessHigh,
                                                 null
                                             ))
-                                            animateScrollToItem(state.firstVisibleItemIndex + 1)
+                                            animateScrollToItem(listState.firstVisibleItemIndex + 1)
+                                            viewModel.videoAutoPlayingStatusChanged(items[listState.firstVisibleItemIndex + 1].id)
                                         }
                                     }
                                 }
