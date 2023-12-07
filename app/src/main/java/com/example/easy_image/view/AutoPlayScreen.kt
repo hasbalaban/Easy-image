@@ -31,7 +31,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.easy_image.utils.ExoPlayerManager
+import com.android.media.mediaPlayer.addMediaItem
+import com.android.media.mediaPlayer.rememberMediaPlayer
+import com.android.media.mediaPlayer.startVideo
 import com.example.easy_image.viewmodel.VideoViewModel
 import kotlinx.coroutines.launch
 
@@ -67,18 +69,14 @@ fun AutoPlayScreen (
 
                 ){
                 items(it){
-                    val exoPlayer by remember {
-                        mutableStateOf(
-                            ExoPlayerManager.initializePlayer(context, it.videoUrl).also {
-                                it.prepare()
-                                it.play()
-                            }
-                        )
+                    val exoPlayer = rememberMediaPlayer()
+                    LaunchedEffect(exoPlayer){
+                        exoPlayer.addMediaItem(it.videoPreviewUrl).startVideo()
                     }
 
-
                     Box (modifier = Modifier.height(windowHeight)){
-                        Box(modifier = Modifier.fillMaxSize()
+                        Box(modifier = Modifier
+                            .fillMaxSize()
                             .alpha(0.8f)
                             .background(Color.Black)){
 
@@ -99,7 +97,9 @@ fun AutoPlayScreen (
                                     }
                                 }
                             }
-                            Text(modifier = Modifier.fillMaxWidth().padding(end = 12.dp), text = it.videoTag, color = Color.White, textAlign = TextAlign.End)
+                            Text(modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(end = 12.dp), text = it.videoTag, color = Color.White, textAlign = TextAlign.End)
                         }
 
 

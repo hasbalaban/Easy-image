@@ -24,8 +24,7 @@ fun MediaPlayer(
                // prepare()
                // play()
 
-                useController = true
-
+                useController = false
             }
         }
     }

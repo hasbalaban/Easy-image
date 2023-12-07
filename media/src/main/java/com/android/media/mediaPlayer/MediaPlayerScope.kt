@@ -8,7 +8,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.media3.exoplayer.ExoPlayer
 
 
-@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 @Composable
 fun rememberMediaPlayer(
 ): ExoPlayer {

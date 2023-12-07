@@ -51,14 +51,15 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
-import androidx.media3.ui.AspectRatioFrameLayout
-import androidx.media3.ui.PlayerView
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
+import com.android.media.mediaPlayer.MediaPlayer
+import com.android.media.mediaPlayer.addMediaItem
+import com.android.media.mediaPlayer.rememberMediaPlayer
+import com.android.media.mediaPlayer.startVideo
 import com.example.easy_image.BuildConfig
 import com.example.easy_image.R
-import com.example.easy_image.utils.ExoPlayerManager
 import com.example.easy_image.utils.SaveImageToCacheAndShare
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.Dispatchers
@@ -249,7 +250,10 @@ fun DetailScreen(dataUrl: String, isImage: Boolean = true, popBackStack: () -> U
 private fun VideoDetailScreen(videoUrl: String) {
     val context = LocalContext.current
 
-    val exoPlayer by remember { mutableStateOf(ExoPlayerManager.createNewPlayer(context, videoUrl)) }
+    val exoPlayer = rememberMediaPlayer()
+    exoPlayer.addMediaItem(videoUrl)
+    exoPlayer.startVideo()
+
     var fraction by remember { mutableStateOf(0.0f) }
 
 
@@ -271,25 +275,16 @@ private fun VideoDetailScreen(videoUrl: String) {
     }
 
     Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier.fillMaxSize()) {
-        DisposableEffect(AndroidView(modifier = Modifier
-            .fillMaxSize(), factory = {
-            PlayerView(context).apply {
-                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
-                player = exoPlayer.apply {
-                    setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
-                    useController = false
-                }
-            }
-        }
-        )) {
-            onDispose {
-                exoPlayer.release()
-            }
-        }
 
+        MediaPlayer(
+            modifier = Modifier
+                .fillMaxSize(),
+            mediaPlayer = exoPlayer
+        )
 
         Box(
-            Modifier.fillMaxWidth()
+            Modifier
+                .fillMaxWidth()
                 .padding(bottom = 4.dp)
                 .animateContentSize()
                 .wrapContentSize(),
@@ -343,11 +338,14 @@ fun VideoTimeLineBar(
 @Composable
 private fun PreviewDetailScreen() {
     Box(
-        Modifier.height(2.dp).fillMaxWidth().padding(bottom = 4.dp),
+        Modifier
+            .height(2.dp)
+            .fillMaxWidth()
+            .padding(bottom = 4.dp),
         contentAlignment = Alignment.BottomStart
     ) {
 
-        VideoTimeLineBar(0.1f,Modifier
+        VideoTimeLineBar(0.1f, Modifier
             .fillMaxWidth()
             .height(1.dp)
             .padding(end = 6.dp)){

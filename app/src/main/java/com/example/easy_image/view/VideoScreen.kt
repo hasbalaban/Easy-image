@@ -41,18 +41,18 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.ui.PlayerView
-import androidx.media3.ui.PlayerView.SHOW_BUFFERING_ALWAYS
 import androidx.navigation.NavController
+import com.android.media.mediaPlayer.MediaPlayer
+import com.android.media.mediaPlayer.addMediaItem
+import com.android.media.mediaPlayer.rememberMediaPlayer
+import com.android.media.mediaPlayer.startVideo
 import com.example.easy_image.R
 import com.easyImage.mediapi.model.VideoItemDTO
 import com.easyImage.mediapi.utils.Resource
-import com.example.easy_image.utils.ExoPlayerManager
 import com.example.easy_image.viewmodel.VideoViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 @Composable
 fun VideoScreen(
     navController: NavController,
@@ -133,16 +133,13 @@ when (videosResult.value?.status){
                     ) {
 
                         var fraction by remember { mutableStateOf(0.1f) }
+                        val exoPlayer = rememberMediaPlayer()
 
-                        val url = it.videoPreviewUrl.ifEmpty { it.videoUrl }
-                        val exoPlayer by remember {
-                            mutableStateOf(
-                                ExoPlayerManager.initializePlayer(context, url, Player.REPEAT_MODE_OFF )
-                            )
+                        LaunchedEffect(exoPlayer){
+                            exoPlayer.addMediaItem(it.videoPreviewUrl.ifEmpty { it.videoUrl }).startVideo()
                         }
 
-
-                    LaunchedEffect(it.isVideoPlaying){
+                        LaunchedEffect(it.isVideoPlaying){
                         exoPlayer.volume = if (it.isMusicOpen) 1f else 0f
                         if (it.isVideoPlaying){
                             exoPlayer.prepare()
@@ -240,7 +237,6 @@ when (videosResult.value?.status){
     null -> ""
 }
 }
-@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 @Composable
 fun VideoItemScreen(
     videoItemDTO: VideoItemDTO,
@@ -256,56 +252,53 @@ fun VideoItemScreen(
             override fun onRenderedFirstFrame() {
                 super.onRenderedFirstFrame()
                 if (playNextVideo != null && exoPlayer.isPlaying && exoPlayer.currentPosition - exoPlayer.duration < 100) {
-                    playNextVideo()
+                    playNextVideo.invoke()
                 }
             }
         })
     }
 
-    DisposableEffect(AndroidView(modifier = Modifier
-        .pointerInput(Unit) {
-            detectTapGestures(
-                onDoubleTap = {
-                    val url = videoItemDTO.videoUrl.ifEmpty { videoItemDTO.videoPreviewUrl }
+    exoPlayer.apply {
+        addListener(listener)
+    }
 
-                    if (openVideoDetail != null) {
-                        openVideoDetail(url)
+    Box {
+        MediaPlayer(modifier = Modifier
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onDoubleTap = {
+                        val url = videoItemDTO.videoPreviewUrl.ifEmpty { videoItemDTO.videoUrl }
+
+                        if (openVideoDetail != null) {
+                            openVideoDetail(url)
+                        }
+                    },
+                    onTap = {
+                        viewModel?.videoVideoPlayingStatusChanged(videoItemDTO.id)
                     }
-                },
-                onTap = {
-                    viewModel?.videoVideoPlayingStatusChanged(videoItemDTO.id)
-                }
-            )
-
-        }
-        .fillMaxWidth()
-        .height(230.dp), factory = {
-        PlayerView(context).apply {
-            player = exoPlayer.apply {
-                setShowBuffering(SHOW_BUFFERING_ALWAYS)
-                addListener(listener)
-
-                useController = false
+                )
 
             }
-        }
-    }
-    )) {
-        onDispose {
-            ExoPlayerManager.releasePlayer(exoPlayer = exoPlayer)
-        }
-    }
-
-
-    if (videoItemDTO.isVideoPlaying.not()) {
-        Image(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(230.dp)
-                .padding(95.dp),
-            painter = painterResource(id = R.drawable.ic_video), contentDescription = null
+            .fillMaxWidth()
+            .height(230.dp),
+            mediaPlayer = exoPlayer,
+            context = context
         )
+
+
+        if (videoItemDTO.isVideoPlaying.not()) {
+            Image(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(230.dp)
+                    .padding(95.dp),
+                painter = painterResource(id = R.drawable.ic_video), contentDescription = null
+            )
+        }
+
     }
+
+
 
 
 }
