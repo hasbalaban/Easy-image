@@ -268,6 +268,25 @@ class MainActivity : ComponentActivity() {
                     Text(text = "Favorite", color = Color.Black)
                 }
             )
+
+
+            NavigationBarItem(
+                selected = currentRoute == NavigationDirections.AutoPlayPage.route,
+                onClick = {
+                    if (currentRoute != NavigationDirections.AutoPlayPage.route) navController.navigate(
+                        NavigationDirections.AutoPlayPage.route)
+                },
+                icon = {
+                    Image(
+                        modifier = Modifier.padding(horizontal = 2.dp),
+                        colorFilter = ColorFilter.tint(Color.Blue),
+                        painter = painterResource(id = R.drawable.auto_video_tab_icon), contentDescription = NavigationDirections.AutoPlayPage.route)
+                },
+                label = {
+                    Text(text = "Video", color = Color.Black)
+                }
+            )
+
             NavigationBarItem(
                 selected = currentRoute == NavigationDirections.Video.route,
                 onClick = {
