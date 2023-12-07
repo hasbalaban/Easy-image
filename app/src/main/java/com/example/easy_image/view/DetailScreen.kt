@@ -251,8 +251,10 @@ private fun VideoDetailScreen(videoUrl: String) {
     val context = LocalContext.current
 
     val exoPlayer = rememberMediaPlayer()
-    exoPlayer.addMediaItem(videoUrl)
-    exoPlayer.startVideo()
+    LaunchedEffect(Unit){
+        exoPlayer.addMediaItem(videoUrl)
+        exoPlayer.startVideo()
+    }
 
     var fraction by remember { mutableStateOf(0.0f) }
 
