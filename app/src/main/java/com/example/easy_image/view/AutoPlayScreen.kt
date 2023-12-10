@@ -6,6 +6,7 @@ import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
@@ -61,14 +62,18 @@ fun AutoPlayScreen (
 
     val items = list.value?.data
 
-    val fullyVisibleItemsInfo = remember { derivedStateOf { listState.layoutInfo.visibleItemsInfo.toMutableList() } }
+    val fullyVisibleItemsInfo = remember { derivedStateOf { listState.layoutInfo} }
 
 
-    fullyVisibleItemsInfo.value.firstOrNull()?.let {
-        items?.get(it.index)?.let {
-            viewModel.videoAutoPlayingStatusChanged(it.id)
+    LaunchedEffect(fullyVisibleItemsInfo){
+        fullyVisibleItemsInfo.value.visibleItemsInfo.toMutableList() .firstOrNull()?.let {
+            items?.get(it.index)?.let {
+                viewModel.videoAutoPlayingStatusChanged(it.id)
+            }
         }
     }
+
+
 
 
     items?.let {
@@ -100,22 +105,30 @@ fun AutoPlayScreen (
 
                         }
 
-                        Column (modifier = Modifier.height(windowHeight), verticalArrangement = Arrangement.Center){
-                            VideoItemScreen(it, null, null, exoPlayer = exoPlayer){
+                        Column (modifier = Modifier
+                            .clickable {
+                                viewModel.videoVideoPlayingStatusChanged(it.id)
+                            }
+                            .height(windowHeight), verticalArrangement = Arrangement.Center){
+                            VideoItemScreen(it, null, viewModel, exoPlayer = exoPlayer) {
+
 
                                 coroutines.launch {
-                                    if (items.size > listState.firstVisibleItemIndex + 1){
+                                    if (items.size > listState.firstVisibleItemIndex + 1) {
                                         listState.apply {
-                                            animateScrollBy(1f, spring(
-                                                dampingRatio = Spring.DampingRatioNoBouncy,
-                                                stiffness = Spring.StiffnessHigh,
-                                                null
-                                            ))
+                                            animateScrollBy(
+                                                1f, spring(
+                                                    dampingRatio = Spring.DampingRatioNoBouncy,
+                                                    stiffness = Spring.StiffnessHigh,
+                                                    null
+                                                )
+                                            )
                                             animateScrollToItem(listState.firstVisibleItemIndex + 1)
                                             viewModel.videoAutoPlayingStatusChanged(items[listState.firstVisibleItemIndex + 1].id)
                                         }
                                     }
                                 }
+
                             }
                             Text(modifier = Modifier
                                 .fillMaxWidth()

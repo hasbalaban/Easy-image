@@ -275,7 +275,7 @@ fun VideoItemScreen(
                     },
                     onTap = {
                         viewModel?.videoVideoPlayingStatusChanged(videoItemDTO.id)
-                    }
+                    },
                 )
 
             }
